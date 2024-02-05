@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="ct-common" />
+        <module name="cloth-store-agency" />
+        <module name="ct-api" />
+        <module name="ct-core-service" />
+        <module name="ct-start" />
+        <module name="ct-core-model" />
+        <module name="ct-common-dal" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ct-core-model.main" target="17" />
+      <module name="ct-core-model.test" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="cloth-store-agency" options="-parameters" />
+      <module name="ct-api" options="-parameters" />
+      <module name="ct-common" options="-parameters" />
+      <module name="ct-common-dal" options="-parameters" />
+      <module name="ct-core-model" options="-parameters" />
+      <module name="ct-core-service" options="-parameters" />
+      <module name="ct-start" options="-parameters" />
+    </option>
+  </component>
+</project>
