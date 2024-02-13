@@ -37,6 +37,10 @@ public class CustomerModel {
         return HandleDate.getDatetimeNowFromSystem();
     }
 
+    public CustomerModel(String id) {
+        this.id = null;
+    }
+
     private void checkIDObject(String id) {
         if (this.id == id) {
             this.date_updated = getDateWhenUpdate();

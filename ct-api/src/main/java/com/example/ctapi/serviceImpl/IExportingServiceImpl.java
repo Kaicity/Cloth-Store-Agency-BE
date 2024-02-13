@@ -9,10 +9,11 @@ import com.example.ctapi.mappers.IExportingbillTransactionMapper;
 import com.example.ctapi.services.IExportingbillService;
 import com.example.ctcommon.enums.BillStatus;
 import com.example.ctcommon.enums.TypeBillRealTime;
-import com.example.ctcommondal.repository.IExportingTransactionRepository;
-import com.example.ctcommondal.repository.IExportingbillRepository;
 import com.example.ctcommondal.entity.ExportbillEntity;
 import com.example.ctcommondal.entity.ExportingBillTransactionEntity;
+import com.example.ctcommondal.repository.IExportingTransactionRepository;
+import com.example.ctcommondal.repository.IExportingbillRepository;
+import com.example.ctcoremodel.CustomerModel;
 import com.example.ctcoremodel.ProductModel;
 import com.example.ctcoremodel.ResponseModel;
 import com.example.ctcoreservice.services.IWarehouseRequestService;
@@ -42,9 +43,14 @@ public class IExportingServiceImpl implements IExportingbillService {
         try {
             // thêm vào thông tin chung của đơn hàng
             exportingBillFullDto.getExportingBill().setStatus(BillStatus.BOOKING);
+
+            ExportingBillDto tempEx = exportingBillFullDto.getExportingBill();
+            if (tempEx.getCustomer() == null) {
+                CustomerModel customer = new CustomerModel(null);
+                tempEx.setCustomer(customer);
+            }
             ExportbillEntity exportbillEntity = IExportingbillMapper.INSTANCE.toFromExportingbillDto(exportingBillFullDto.getExportingBill());
             iExportingbillRepository.save(exportbillEntity);
-
             // thêm vào chi tiet don hang
             for (ExportingBillTransactionDto detail : exportingBillFullDto.getExportingBillTransactions()) {
                 detail.setBill(exportingBillFullDto.getExportingBill());
@@ -64,6 +70,7 @@ public class IExportingServiceImpl implements IExportingbillService {
             throw e;
         }
     }
+
 
     @Override
     public List<ExportingBillFullDto> getAllExportingbill(HttpServletRequest request) throws IOException {

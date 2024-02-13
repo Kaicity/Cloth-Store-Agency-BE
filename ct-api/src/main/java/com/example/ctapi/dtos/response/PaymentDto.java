@@ -1,8 +1,7 @@
 package com.example.ctapi.dtos.response;
 
 import com.example.ctapi.dtos.BussinessLogic.CreateRandomID;
-import com.example.ctcommon.enums.BillStatus;
-import com.example.ctcoremodel.CustomerModel;
+import com.example.ctcommon.enums.PaymentStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -13,21 +12,20 @@ import java.time.format.DateTimeFormatter;
 
 @Data
 @AllArgsConstructor
-public class ExportingBillDto {
+public class PaymentDto {
     private String id;
     private String code;
-    private LocalDateTime dateExport;
+    private LocalDateTime dateUpdated;
     private LocalDateTime dateCreated;
     private Double total;
     @Enumerated(EnumType.STRING)
-    private BillStatus status;
-    private CustomerModel customer;
-    private AgencyDto agency;
-    private CustomerNotLoginDto customerNotLogin;
+    private PaymentStatus status;
+    private TypePaymentReceiptDto typePaymentReceiptDto;
+    private String note;
 
-    public ExportingBillDto() {
+    public PaymentDto() {
         this.id = CreateRandomID.generatingUID();
-        this.code = CreateRandomID.generateRandomId("DH");
+        this.code = CreateRandomID.generateRandomId("PM");
         LocalDateTime currentDateTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDateTime = currentDateTime.format(formatter);

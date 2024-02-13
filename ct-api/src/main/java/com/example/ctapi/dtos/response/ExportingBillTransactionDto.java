@@ -17,6 +17,7 @@ public class ExportingBillTransactionDto {
     private ColorsModel color;
     private SizesModel size;
 
+
     public ExportingBillTransactionDto(){
         this.id = CreateRandomID.generatingUID();
     }
