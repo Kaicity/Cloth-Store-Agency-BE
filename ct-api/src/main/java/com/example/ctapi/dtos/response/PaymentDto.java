@@ -20,7 +20,7 @@ public class PaymentDto {
     private Double total;
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
-    private TypePaymentReceiptDto typePaymentReceiptDto;
+    private TypePaymentReceiptDto typePaymentReceipt;
     private String note;
 
     public PaymentDto() {
