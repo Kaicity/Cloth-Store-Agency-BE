@@ -27,6 +27,9 @@ public class WarehouseServiceRequest {
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost post = new HttpPost(warehouseApiUrl + uri);
 
+            String authHeader = request.getHeader("Authorization");
+            post.setHeader("Authorization", authHeader);
+
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writeValueAsString(body);
             StringEntity entry = new StringEntity(json, ContentType.APPLICATION_JSON);
