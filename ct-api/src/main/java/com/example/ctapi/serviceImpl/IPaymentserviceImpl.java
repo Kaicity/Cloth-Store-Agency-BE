@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,7 +85,7 @@ public class IPaymentserviceImpl implements IPaymentService {
             paymentEntity.setCode(updatedPaymentDto.getCode());
             paymentEntity.setTotal(updatedPaymentDto.getTotal());
             paymentEntity.setStatus(updatedPaymentDto.getStatus());
-            paymentEntity.setIdTypePayment(updatedPaymentDto.getTypePaymentReceiptDto().getName());
+            paymentEntity.setIdTypePayment(updatedPaymentDto.getTypePaymentReceipt().getName());
             paymentEntity.setNote(updatedPaymentDto.getNote());
             paymentEntity.setDateUpdated(LocalDateTime.now());
 

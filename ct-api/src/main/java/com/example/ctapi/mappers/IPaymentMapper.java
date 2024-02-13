@@ -14,11 +14,11 @@ import java.util.List;
 public interface IPaymentMapper {
     IPaymentMapper INSTANCE = Mappers.getMapper(IPaymentMapper.class);
 
-    @Mapping(target = "idTypePayment", source = "typePaymentReceiptDto.id")
+    @Mapping(target = "idTypePayment", source = "typePaymentReceipt.id")
     @Mapping(target = "status", source = "status")
     PaymentEntity toFromPaymentDto(PaymentDto paymentDto);
 
-    @Mapping(target = "typePaymentReceiptDto.id",source = "idTypePayment")
+    @Mapping(target = "typePaymentReceipt.id",source = "idTypePayment")
     @Mapping(target = "status",source = "status")
     PaymentDto toFromPaymentEntity(PaymentEntity paymentEntity);
 

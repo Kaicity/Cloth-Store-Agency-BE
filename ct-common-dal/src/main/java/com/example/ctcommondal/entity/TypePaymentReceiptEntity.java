@@ -1,5 +1,6 @@
 package com.example.ctcommondal.entity;
 
+import com.example.ctcommon.enums.TypePaymentReceipt;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +27,9 @@ public class TypePaymentReceiptEntity {
     private String description;
 
     @Column(name = "type")
-    private String type;
+
+    @Enumerated(EnumType.STRING)
+    private TypePaymentReceipt type;
 
     @Column(name = "date_Updated")
     private LocalDateTime dateUpdated;
