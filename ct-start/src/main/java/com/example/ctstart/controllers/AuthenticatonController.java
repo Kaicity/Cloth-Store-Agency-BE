@@ -39,7 +39,7 @@ public class AuthenticatonController {
     public ResponseEntity<JwtAuthenticationResponse>signin(@RequestBody SigninRequest signinRequest, HttpServletRequest request){
         UserDto userDto = new UserDto();
         userDto.setId("123");
-        userDto.setFullName("Ronaldomessi");
+            userDto.setFullName("Ronaldomessi");
         userDto.setPhone("0123123123");
         userDto.setCompanyId("Com1");
         userDto.setEmail(signinRequest.getEmail());
@@ -73,6 +73,4 @@ public class AuthenticatonController {
           return ResponseEntity.ok(new ResponseDto(List.of("get pass ok"),
                 HttpStatus.OK.value(), encodedPassword));
     }
-
-
 }
