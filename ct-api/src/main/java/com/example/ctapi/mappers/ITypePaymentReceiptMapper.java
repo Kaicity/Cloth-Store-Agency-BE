@@ -19,4 +19,5 @@ public interface ITypePaymentReceiptMapper {
     TypePaymentReceiptDto toFromTypePaymentReceiptEntity(TypePaymentReceiptEntity typePaymentReceiptEntity);
 
     List<TypePaymentReceiptDto> toFromTypePaymentReceiptsEntity(List<TypePaymentReceiptEntity> typePaymentReceiptEntity);
+
 }

@@ -32,6 +32,9 @@ public class PaymentEntity {
     @Column(name = "total")
     private Double total;
 
+    @Column(name = "beneficiary")
+    private String beneficiary;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private PaymentStatus status;

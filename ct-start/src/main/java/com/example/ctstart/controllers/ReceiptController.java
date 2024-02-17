@@ -73,4 +73,15 @@ public class ReceiptController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Receipt: " + e.getMessage());
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getReceiptById(@PathVariable String id) {
+        try {
+            var result = iReceiptService.getReceiptById(id);
+            return ResponseEntity.ok(new ResponseDto(List.of("data get sucess"),
+                    HttpStatus.OK.value(),result ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error get Payment: " + e.getMessage());
+        }
+    }
 }

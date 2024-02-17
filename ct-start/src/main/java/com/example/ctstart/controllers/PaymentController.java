@@ -38,6 +38,7 @@ public class PaymentController {
 
     @PostMapping("/getAllPayment")
     public ResponseEntity<?> getAllPayment() {
+        int a = 0;
         try {
             var result = iPaymentService.getAllPaymentFull();
             return ResponseEntity.ok(new ResponseDto(List.of("get all Payment success"),
@@ -71,6 +72,17 @@ public class PaymentController {
                     HttpStatus.OK.value(),paymentFull ));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Payment: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPaymentById(@PathVariable String id) {
+        try {
+            var result = iPaymentService.getPaymentById(id);
+            return ResponseEntity.ok(new ResponseDto(List.of("data get sucess"),
+                    HttpStatus.OK.value(),result ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error get Payment: " + e.getMessage());
         }
     }
 }

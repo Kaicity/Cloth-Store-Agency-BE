@@ -18,6 +18,7 @@ public class PaymentDto {
     private LocalDateTime dateUpdated;
     private LocalDateTime dateCreated;
     private Double total;
+    private String beneficiary;
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
     private TypePaymentReceiptDto typePaymentReceipt;

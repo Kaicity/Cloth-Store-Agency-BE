@@ -1,17 +1,17 @@
 package com.example.ctapi.serviceImpl;
 
-import com.example.ctapi.dtos.response.ReceiptDto;
-import com.example.ctapi.dtos.response.ReceiptFullDto;
-import com.example.ctapi.dtos.response.ReceiptSearchDto;
-import com.example.ctapi.dtos.response.ReceiptTransactionDto;
+import com.example.ctapi.dtos.response.*;
 import com.example.ctapi.mappers.IReceiptMapper;
 import com.example.ctapi.mappers.IReceiptTransactionMapper;
+import com.example.ctapi.mappers.ITypePaymentReceiptMapper;
 import com.example.ctapi.services.IReceiptService;
 import com.example.ctcommon.enums.ReceiptStatus;
 import com.example.ctcommondal.entity.ReceiptEntity;
 import com.example.ctcommondal.entity.ReceiptTransactionEntity;
+import com.example.ctcommondal.entity.TypePaymentReceiptEntity;
 import com.example.ctcommondal.repository.IReceiptRepository;
 import com.example.ctcommondal.repository.IReceiptTransactionRepository;
+import com.example.ctcommondal.repository.ITypePaymentReceiptRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +29,7 @@ public class IReceiptServiceImpl implements IReceiptService {
     private final Logger logger = LoggerFactory.getLogger(IReceiptServiceImpl.class);
     private final IReceiptRepository iReceiptRepository;
     private final IReceiptTransactionRepository iReceiptTransactionRepository;
+    private final ITypePaymentReceiptRepository iTypePaymentReceiptRepository;
 
     @Override
     public void createReceipt(ReceiptFullDto receiptFull) {
@@ -60,8 +61,7 @@ public class IReceiptServiceImpl implements IReceiptService {
             String receiptId = receiptFull.getReceipt().getId();
 
             // Retrieve Receipt and ReceiptTransaction entities
-            ReceiptEntity receiptEntity = iReceiptRepository.findById(receiptId)
-                    .orElseThrow(() -> new RuntimeException("Receipt with id " + receiptId + " not found."));
+            ReceiptEntity receiptEntity = iReceiptRepository.findReceiptById(receiptId);
 
             List<ReceiptTransactionEntity> receiptTransactionEntities = iReceiptTransactionRepository.findByReceiptId(receiptId);
 
@@ -83,14 +83,15 @@ public class IReceiptServiceImpl implements IReceiptService {
             receiptEntity.setCode(updatedReceiptDto.getCode());
             receiptEntity.setTotal(updatedReceiptDto.getTotal());
             receiptEntity.setStatus(updatedReceiptDto.getStatus());
-            receiptEntity.setIdTypeReceipt(updatedReceiptDto.getTypePaymentReceipt().getName());
+            receiptEntity.setIdTypeReceipt(updatedReceiptDto.getTypePaymentReceipt().getId());
             receiptEntity.setNote(updatedReceiptDto.getNote());
             receiptEntity.setDateUpdated(LocalDateTime.now());
 
             // Save updated Receipt
             iReceiptRepository.save(receiptEntity);
         } catch (Exception e) {
-            throw new RuntimeException("Error updating ReceiptFullDto: " + e.getMessage());
+            logger.error(e.getMessage(), e);
+            throw e;
         }
 
     }
@@ -104,8 +105,7 @@ public class IReceiptServiceImpl implements IReceiptService {
 
             // Sau đó xóa Receipt
             iReceiptRepository.deleteById(id);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error deleting ReceiptFullDto: " + e.getMessage());
         }
     }
@@ -113,9 +113,15 @@ public class IReceiptServiceImpl implements IReceiptService {
     @Override
     @Transactional
     public ReceiptSearchDto getAllReceiptFull() {
-        int a = 0;
         List<ReceiptEntity> receiptEntityList = this.iReceiptRepository.getAllReceipt();
         List<ReceiptDto> receiptDtosList = IReceiptMapper.INSTANCE.toFromReceiptEntityList(receiptEntityList);
+
+        for (ReceiptDto r : receiptDtosList) {
+            TypePaymentReceiptEntity typePaymentReceiptEntity = iTypePaymentReceiptRepository
+                    .findTypePaymentReceiptById(r.getTypePaymentReceipt().getId());
+            TypePaymentReceiptDto typePaymentReceiptDto = ITypePaymentReceiptMapper.INSTANCE.toFromTypePaymentReceiptEntity(typePaymentReceiptEntity);
+            r.setTypePaymentReceipt(typePaymentReceiptDto);
+        }
 
         List<String> ids = receiptDtosList.stream().map(ReceiptDto::getId).collect(Collectors.toList());
 
@@ -141,6 +147,31 @@ public class IReceiptServiceImpl implements IReceiptService {
         ReceiptSearchDto result = new ReceiptSearchDto();
         result.setResult(receiptFullDtos);
         return result;
+    }
+
+    @Transactional
+    @Override
+    public ReceiptFullDto getReceiptById(String id) {
+        try {
+            ReceiptEntity receiptEntity = iReceiptRepository.findReceiptById(id);
+            ReceiptDto receiptDto = IReceiptMapper.INSTANCE.toFromReceiptEntity(receiptEntity);
+
+            TypePaymentReceiptEntity typePaymentReceiptEntity = iTypePaymentReceiptRepository
+                    .findTypePaymentReceiptById(receiptDto.getTypePaymentReceipt().getId());
+            TypePaymentReceiptDto typePaymentReceiptDto = ITypePaymentReceiptMapper.INSTANCE.toFromTypePaymentReceiptEntity(typePaymentReceiptEntity);
+            receiptDto.setTypePaymentReceipt(typePaymentReceiptDto);
+
+            List<ReceiptTransactionEntity> receiptTransactionEntities = iReceiptTransactionRepository.findByReceiptId(id);
+            List<ReceiptTransactionDto> receiptTransactionDtos = IReceiptTransactionMapper.INSTANCE.toFromReceiptTransactionEntityList(receiptTransactionEntities);
+
+            ReceiptFullDto receiptFullDto = new ReceiptFullDto();
+            receiptFullDto.setReceipt(receiptDto);
+            receiptFullDto.setReceiptTransaction(receiptTransactionDtos);
+            return receiptFullDto;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
     }
 }
 
