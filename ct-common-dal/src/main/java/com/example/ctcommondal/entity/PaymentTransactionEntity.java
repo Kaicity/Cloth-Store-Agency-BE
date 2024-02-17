@@ -23,7 +23,7 @@ public class PaymentTransactionEntity {
     @Column(name = "id_payment")
     private String idPayment;
 
-    @Column(name = "quatity")
+    @Column(name = "quantity")
     private Integer quatity;
 
     @Column(name = "price")

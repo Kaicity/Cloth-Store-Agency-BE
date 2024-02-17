@@ -1,8 +1,6 @@
 package com.example.ctapi.mappers;
 
-import com.example.ctapi.dtos.response.PaymentDto;
 import com.example.ctapi.dtos.response.ReceiptDto;
-import com.example.ctcommondal.entity.PaymentEntity;
 import com.example.ctcommondal.entity.ReceiptEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -20,5 +18,6 @@ public interface IReceiptMapper {
 
     @Mapping(target = "typePaymentReceipt.id",source = "idTypeReceipt")
     @Mapping(target = "status",source = "status")
+    ReceiptDto toFromReceiptEntity(ReceiptEntity receiptEntity);
     List<ReceiptDto> toFromReceiptEntityList(List<ReceiptEntity> receiptEntityList);
 }

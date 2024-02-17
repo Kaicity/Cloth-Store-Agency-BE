@@ -15,5 +15,5 @@ public interface ITypePaymentReceiptRepository extends JpaRepository<TypePayment
     List<TypePaymentReceiptEntity> findAllTypePaymentReceipt(@Param("type") TypePaymentReceipt type);
 
     @Query("SELECT t FROM TypePaymentReceiptEntity t WHERE t.id = :id")
-    List<TypePaymentReceiptEntity> findTypePaymentReceiptById(@Param("id") TypePaymentReceipt id);
+    TypePaymentReceiptEntity findTypePaymentReceiptById(@Param("id") String id);
 }

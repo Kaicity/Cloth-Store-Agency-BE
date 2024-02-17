@@ -27,7 +27,6 @@ public class TypePaymentReceiptEntity {
     private String description;
 
     @Column(name = "type")
-
     @Enumerated(EnumType.STRING)
     private TypePaymentReceipt type;
 

@@ -1,8 +1,6 @@
 package com.example.ctapi.mappers;
 
-import com.example.ctapi.dtos.response.ExportingBillDto;
 import com.example.ctapi.dtos.response.PaymentDto;
-import com.example.ctcommondal.entity.ExportbillEntity;
 import com.example.ctcommondal.entity.PaymentEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
