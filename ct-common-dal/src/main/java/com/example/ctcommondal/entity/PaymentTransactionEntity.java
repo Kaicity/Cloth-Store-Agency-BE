@@ -24,7 +24,7 @@ public class PaymentTransactionEntity {
     private String idPayment;
 
     @Column(name = "quantity")
-    private Integer quatity;
+    private int quantity;
 
     @Column(name = "price")
     private Double price;

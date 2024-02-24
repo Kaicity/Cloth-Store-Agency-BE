@@ -1,13 +1,14 @@
 package com.example.ctcommondal.repository;
 
 import com.example.ctcommondal.entity.PaymentEntity;
-import com.example.ctcommondal.entity.ProductEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface IPaymentRepository extends JpaRepository<PaymentEntity, String> {
     @Query("select e from PaymentEntity e ")
     List<PaymentEntity> getAllPayment();

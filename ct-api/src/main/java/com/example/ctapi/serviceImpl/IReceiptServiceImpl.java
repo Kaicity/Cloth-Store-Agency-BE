@@ -6,6 +6,7 @@ import com.example.ctapi.mappers.IReceiptTransactionMapper;
 import com.example.ctapi.mappers.ITypePaymentReceiptMapper;
 import com.example.ctapi.services.IReceiptService;
 import com.example.ctcommon.enums.ReceiptStatus;
+import com.example.ctcommondal.entity.PaymentTransactionEntity;
 import com.example.ctcommondal.entity.ReceiptEntity;
 import com.example.ctcommondal.entity.ReceiptTransactionEntity;
 import com.example.ctcommondal.entity.TypePaymentReceiptEntity;
@@ -54,59 +55,58 @@ public class IReceiptServiceImpl implements IReceiptService {
         }
     }
 
+    @Transactional
     @Override
     public void updateReceipt(ReceiptFullDto receiptFull) {
         try {
-            // Extract Receipt ID
             String receiptId = receiptFull.getReceipt().getId();
 
-            // Retrieve Receipt and ReceiptTransaction entities
-            ReceiptEntity receiptEntity = iReceiptRepository.findReceiptById(receiptId);
-
+            // Xóa các PaymentTransaction trước
             List<ReceiptTransactionEntity> receiptTransactionEntities = iReceiptTransactionRepository.findByReceiptId(receiptId);
+            iReceiptTransactionRepository.deleteAll(receiptTransactionEntities);
 
-            // Update ReceiptTransactions from updatedReceiptFullDto
-            List<ReceiptTransactionDto> receiptTransactionDtos = receiptFull.getReceiptTransaction();
-            for (int i = 0; i < receiptTransactionDtos.size(); i++) {
-                ReceiptTransactionDto updatedTransaction = receiptTransactionDtos.get(i);
-                ReceiptTransactionEntity currentTransaction = receiptTransactionEntities.get(i);
-                currentTransaction.setQuatity(updatedTransaction.getQuantity());
-                currentTransaction.setPrice(updatedTransaction.getPrice());
-                currentTransaction.setAmount(updatedTransaction.getAmount());
-            }
+            // Cập nhật thông tin của receipt
+            ReceiptEntity receiptEntity = iReceiptRepository.findById(receiptId)
+                    .orElseThrow(() -> new RuntimeException("Receipt with id " + receiptId + " not found."));
 
-            // Save updated ReceiptTransactions
-            iReceiptTransactionRepository.saveAll(receiptTransactionEntities);
-
-            // Update Receipt details from updatedReceiptFullDto
+            // Cập nhật thông tin của Payment từ PaymentDto
             ReceiptDto updatedReceiptDto = receiptFull.getReceipt();
             receiptEntity.setCode(updatedReceiptDto.getCode());
             receiptEntity.setTotal(updatedReceiptDto.getTotal());
-            receiptEntity.setStatus(updatedReceiptDto.getStatus());
             receiptEntity.setIdTypeReceipt(updatedReceiptDto.getTypePaymentReceipt().getId());
             receiptEntity.setNote(updatedReceiptDto.getNote());
             receiptEntity.setDateUpdated(LocalDateTime.now());
 
-            // Save updated Receipt
+            // Lưu lại thông tin receipt đã cập nhật
             iReceiptRepository.save(receiptEntity);
+
+            // Mapper từ importingTransactionDto sang ImportingTransactionEntity và lưu vào cơ sở dữ liệu
+            List<ReceiptTransactionEntity> receiptTransactionUpdate = IReceiptTransactionMapper
+                    .INSTANCE.toFromReceiptTransactionDtoList(receiptFull.getReceiptTransaction());
+            // Cập nhật lại receipt cho các receipttransaction
+            for (ReceiptTransactionEntity transactionEntity : receiptTransactionUpdate) {
+                transactionEntity.setIdReceipt(receiptId);
+            }
+
+            // Lưu lại thông tin các PaymentTransactionEntity đã cập nhật
+            iReceiptTransactionRepository.saveAll(receiptTransactionUpdate);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
         }
-
     }
 
+    @Transactional
     @Override
     public void deleteReceiptFullByid(String id) {
         try {
-            // Xóa các Receipt Transaction trước
-            List<ReceiptTransactionEntity> receiptTransactions = iReceiptTransactionRepository.findByReceiptId(id);
-            iReceiptTransactionRepository.deleteAll(receiptTransactions);
-
-            // Sau đó xóa Receipt
+            List<ReceiptTransactionEntity> receiptTransactionEntities = iReceiptTransactionRepository.findByReceiptId(id);
+            iReceiptTransactionRepository.deleteAll(receiptTransactionEntities);
+            // Sau đó xóa receipt
             iReceiptRepository.deleteById(id);
         } catch (Exception e) {
-            throw new RuntimeException("Error deleting ReceiptFullDto: " + e.getMessage());
+            logger.error(e.getMessage(), e);
+            throw e;
         }
     }
 

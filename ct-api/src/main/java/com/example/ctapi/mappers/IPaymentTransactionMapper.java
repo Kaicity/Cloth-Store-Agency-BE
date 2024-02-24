@@ -9,7 +9,6 @@ import org.mapstruct.factory.Mappers;
 import java.util.List;
 
 @Mapper
-
 public interface IPaymentTransactionMapper {
     IPaymentTransactionMapper INSTANCE = Mappers.getMapper(IPaymentTransactionMapper.class);
     @Mapping(target = "idPayment",source = "payment.id")
