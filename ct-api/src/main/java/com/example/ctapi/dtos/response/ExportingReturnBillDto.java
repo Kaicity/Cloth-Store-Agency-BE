@@ -20,9 +20,9 @@ public class ExportingReturnBillDto {
     private Double total;
     @Enumerated(EnumType.STRING)
     private ImportingStatus status;
-    private LocalDateTime dateCreated;
+    private LocalDateTime dateExport;
     private LocalDateTime dateUpdated;
-    private String importing;
+    private ImportingDto importing;
 
     public ExportingReturnBillDto() {
         this.id = CreateRandomID.generatingUID();

@@ -37,7 +37,7 @@ public class ExportingReturnBillEntity {
     private ImportingStatus status;
 
     @Column(name = "date_created")
-    private LocalDateTime dateCreated;
+    private LocalDateTime dateExport;
 
     @Column(name = "date_updated")
     private LocalDateTime dateUpdated;

@@ -19,7 +19,7 @@ public interface IExportingReturnBillMapper {
     @Mapping(target = "supplierId", source = "supplier.id")
     @Mapping(target = "status", source = "status")
     @Mapping(target = "importingId", source = "importing.id")
-    ExportingReturnBillEntity oFromImportingReturnbillDto(ExportingReturnBillDto exportingReturnBillDto);
+    ExportingReturnBillEntity toFromImportingReturnbillDto(ExportingReturnBillDto exportingReturnBillDto);
 
     List<ExportingReturnBillEntity> toFromListImportingReturnbillDto(List<ExportingReturnBillDto> exportingReturnBillDto);
 
@@ -27,7 +27,7 @@ public interface IExportingReturnBillMapper {
     @Mapping(target = "supplier.id",source = "supplierId")
     @Mapping(target = "status",source = "status")
     @Mapping(target = "importing.id", source = "importingId")
-    ExportingReturnBillDto toFromImportingEntity(ExportingReturnBillEntity exportingReturnBillEntity);
-    List<ExportingReturnBillDto> toFromListImportingReturnbillEntity(List<ExportingReturnBillEntity> exportingReturnBillEntities);
+    ExportingReturnBillDto toFromExportingReturnEntity(ExportingReturnBillEntity exportingReturnBillEntity);
+    List<ExportingReturnBillDto> toFromListExportingReturnbillEntity(List<ExportingReturnBillEntity> exportingReturnBillEntities);
 
 }
