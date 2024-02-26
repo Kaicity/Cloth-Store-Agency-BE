@@ -59,35 +59,38 @@ public class IPaymentserviceImpl implements IPaymentService {
     @Transactional
     public void updatePayment(PaymentFullDto paymentFull) {
         try {
-            // Retrieve Payment and PaymentTransaction entities
-            PaymentEntity paymentEntity = iPaymentRepository.findPaymentById(paymentFull.getPayment().getId());
+            String paymentId = paymentFull.getPayment().getId();
 
-            List<PaymentTransactionEntity> paymentTransactionEntities = iPaymentTrasactionRepository.findByPaymentId(paymentFull.getPayment().getId());
+            // Xóa các PaymentTransaction trước
+            List<PaymentTransactionEntity> paymentTransactions = iPaymentTrasactionRepository.findByPaymentId(paymentId);
+            iPaymentTrasactionRepository.deleteAll(paymentTransactions);
 
-            // Update PaymentTransactions from paymentFull
-            List<PaymentTransactionDto> updatedPaymentTransactions = paymentFull.getPaymentTransactions();
-            for (int i = 0; i < updatedPaymentTransactions.size(); i++) {
-                PaymentTransactionDto updatedTransaction = updatedPaymentTransactions.get(i);
-                PaymentTransactionEntity currentTransaction = paymentTransactionEntities.get(i);
-                currentTransaction.setQuatity(updatedTransaction.getQuantity());
-                currentTransaction.setPrice(updatedTransaction.getPrice());
-                currentTransaction.setAmount(updatedTransaction.getAmount());
-            }
+            // Cập nhật thông tin của Payment
+            PaymentEntity paymentEntity = iPaymentRepository.findById(paymentId)
+                    .orElseThrow(() -> new RuntimeException("Payment with id " + paymentId + " not found."));
 
-            // Save updated PaymentTransactions
-            iPaymentTrasactionRepository.saveAll(paymentTransactionEntities);
-
-            // Update Payment details from paymentFull
+            // Cập nhật thông tin của Payment từ PaymentDto
             PaymentDto updatedPaymentDto = paymentFull.getPayment();
             paymentEntity.setCode(updatedPaymentDto.getCode());
             paymentEntity.setTotal(updatedPaymentDto.getTotal());
-            paymentEntity.setStatus(updatedPaymentDto.getStatus());
             paymentEntity.setIdTypePayment(updatedPaymentDto.getTypePaymentReceipt().getId());
             paymentEntity.setNote(updatedPaymentDto.getNote());
             paymentEntity.setDateUpdated(LocalDateTime.now());
 
-            // Save updated Payment
+            // Lưu lại thông tin Payment đã cập nhật
             iPaymentRepository.save(paymentEntity);
+
+            // Mapper từ PaymentTransactionDto sang PaymentTransactionEntity và lưu vào cơ sở dữ liệu
+            List<PaymentTransactionEntity> paymentTransactionEntities = IPaymentTransactionMapper.INSTANCE
+                    .toFromPaymentTransactionDtoList(paymentFull.getPaymentTransactions());
+
+            // Cập nhật lại paymentId cho các PaymentTransactionEntity
+            for (PaymentTransactionEntity transactionEntity : paymentTransactionEntities) {
+                transactionEntity.setIdPayment(paymentId);
+            }
+
+            // Lưu lại thông tin các PaymentTransactionEntity đã cập nhật
+            iPaymentTrasactionRepository.saveAll(paymentTransactionEntities);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
@@ -97,7 +100,6 @@ public class IPaymentserviceImpl implements IPaymentService {
     @Override
     @Transactional
     public PaymentSearchDto getAllPaymentFull() {
-        int a = 0;
         List<PaymentEntity> paymentEntities = this.iPaymentRepository.getAllPayment();
         List<PaymentDto> paymentDtos = IPaymentMapper.INSTANCE.toFromPaymentEntityList(paymentEntities);
 

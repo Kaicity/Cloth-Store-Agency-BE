@@ -4,23 +4,23 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
-import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.apache.http.impl.client.CloseableHttpClient;
+
 import java.io.IOException;
 
 @Component
 public class WarehouseServiceRequest {
-    private String warehouseApiUrl="http://localhost:5556";
+    private String warehouseApiUrl = "http://localhost:5556";
 
     public <T, K> T post(String uri, K body, Class<T> clazz, HttpServletRequest request)
             throws IOException {
@@ -44,6 +44,22 @@ public class WarehouseServiceRequest {
             // Handle or log the exception appropriately
             throw e;
         }
+    }
+
+    public <T> T get(String uri, Class<T> clazz, HttpServletRequest request)
+            throws IOException {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpGet get = new HttpGet(uri);
+
+        String authHeader = request.getHeader("Authorization");
+        get.setHeader("Authorization", authHeader);
+        get.setHeader("X-Store", request.getHeader("X-Store"));
+        get.setHeader("X-Company", request.getHeader("X-Company"));
+        get.setHeader(HttpHeaders.ACCEPT_LANGUAGE, request.getHeader(HttpHeaders.ACCEPT_LANGUAGE));
+
+        CloseableHttpResponse response = httpClient.execute(createHost(), get);
+
+        return this.getContentResponse(response, clazz);
     }
 
     private <T> T getContentResponse(CloseableHttpResponse response, Class<T> clazz)

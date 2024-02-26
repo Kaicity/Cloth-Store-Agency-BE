@@ -9,13 +9,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @AllArgsConstructor
-public class AgencyDto {
+public class CompanyDto {
     private String id;
+    private String code;
     private String name;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
     private String phone;
     private String address;
-    private String code;
-    private CompanyDto company;
 }

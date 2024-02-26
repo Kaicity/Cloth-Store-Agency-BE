@@ -1,6 +1,5 @@
 package com.example.ctapi.services;
 
-import com.example.ctapi.dtos.response.PaymentDto;
 import com.example.ctapi.dtos.response.PaymentFullDto;
 import com.example.ctapi.dtos.response.PaymentSearchDto;
 
