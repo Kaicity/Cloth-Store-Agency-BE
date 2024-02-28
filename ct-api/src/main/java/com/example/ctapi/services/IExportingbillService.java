@@ -1,6 +1,7 @@
 package com.example.ctapi.services;
 
 import com.example.ctapi.dtos.response.ExportingBillFullDto;
+import com.example.ctapi.dtos.response.ExportingBillFullSearchDto;
 import com.example.ctcoremodel.ProductModel;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -13,4 +14,5 @@ public interface IExportingbillService {
     List<ExportingBillFullDto> getAllExportingbill(HttpServletRequest request) throws IOException;
 
     List<ProductModel> getTesTToWarehouse(HttpServletRequest request) throws IOException;
+    ExportingBillFullSearchDto getAllExportingBillUseBaseSearch(HttpServletRequest request) throws  IOException;
 }
