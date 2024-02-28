@@ -1,6 +1,7 @@
 package com.example.ctcoreservice.impl;
 
 import com.example.ctcommon.util.WarehouseServiceRequest;
+import com.example.ctcoremodel.CustomerModel;
 import com.example.ctcoremodel.ProductModel;
 import com.example.ctcoremodel.ResponseModel;
 import com.example.ctcoremodel.SupplierModel;
@@ -50,6 +51,18 @@ public class WarehouseRequestServiceImpl implements IWarehouseRequestService {
         response = storeServiceRequest.post(url, supplierIds, response.getClass(), request);
         if (response.getStatus() == HttpStatus.SC_OK && response.getResult() != null) {
             SupplierModel[] result = getContentResponse(response.getResult(), SupplierModel[].class);
+            response.setResult(Arrays.asList(result));
+        }
+        return response;
+    }
+
+    @Override
+    public ResponseModel<List<CustomerModel>> getCustomerModelFromWarehouseByIds(HttpServletRequest request, List<String> customerIds) throws IOException {
+        ResponseModel<List<CustomerModel>> response = new ResponseModel();
+        String url = "/api/v1/Customer/getCustomerByIdShare";
+        response = storeServiceRequest.post(url, customerIds, response.getClass(), request);
+        if (response.getStatus() == HttpStatus.SC_OK && response.getResult() != null) {
+            CustomerModel[] result = getContentResponse(response.getResult(), CustomerModel[].class);
             response.setResult(Arrays.asList(result));
         }
         return response;

@@ -1,9 +1,6 @@
 package com.example.ctapi.serviceImpl;
 
-import com.example.ctapi.dtos.response.ExportingBillDto;
-import com.example.ctapi.dtos.response.ExportingBillFullDto;
-import com.example.ctapi.dtos.response.ExportingBillTransactionDto;
-import com.example.ctapi.dtos.response.SocketMessage;
+import com.example.ctapi.dtos.response.*;
 import com.example.ctapi.mappers.IExportingbillMapper;
 import com.example.ctapi.mappers.IExportingbillTransactionMapper;
 import com.example.ctapi.services.IExportingbillService;
@@ -23,9 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +45,8 @@ public class IExportingServiceImpl implements IExportingbillService {
 
             ExportingBillDto tempEx = exportingBillFullDto.getExportingBill();
             if (tempEx.getCustomer() == null) {
-                CustomerModel customer = new CustomerModel(null);
+
+                CustomerModel customer=new  CustomerModel();
                 tempEx.setCustomer(customer);
             }
             ExportbillEntity exportbillEntity = IExportingbillMapper.INSTANCE.toFromExportingbillDto(exportingBillFullDto.getExportingBill());
@@ -71,6 +71,62 @@ public class IExportingServiceImpl implements IExportingbillService {
         }
     }
 
+    @Override
+    @Transactional
+    public ExportingBillFullSearchDto getAllExportingBillUseBaseSearch(HttpServletRequest request) throws IOException {
+        int a = 0;
+        try {
+            List<ExportbillEntity> exporting = iExportingbillRepository.findAll();
+            List<ExportingBillDto> bill = IExportingbillMapper.INSTANCE.toFromExportingbillDtoList(exporting);
+            List<String> billId = bill.stream().map(ExportingBillDto::getId).collect(Collectors.toList());
+            List<ExportingBillTransactionEntity> exportTransaction = iExportingTransactionRepository.getAllDetails(billId);
+            List<ExportingBillTransactionDto> transactions = IExportingbillTransactionMapper.INSTANCE.toExportingBillTransactionDtoList(exportTransaction);
+            List<String> customerId = bill.stream().map(ExportingBillDto::getCustomer).map(CustomerModel::getId).collect(Collectors.toList());
+
+            ResponseModel<List<CustomerModel>> reponeFromWareHouseCustomer = warehouseRequestService
+                    .getCustomerModelFromWarehouseByIds(request, customerId);
+            List<CustomerModel> customerModels = reponeFromWareHouseCustomer != null ? reponeFromWareHouseCustomer.getResult() : new ArrayList<>();
+
+            List<String> productIds = transactions.stream()
+                    .map(ExportingBillTransactionDto::getProduct).map(ProductModel::getId).distinct()
+                    .collect(Collectors.toList());
+
+            ResponseModel<List<ProductModel>> responseFromWareHouse = productIds.size() > 0 ? warehouseRequestService
+                    .getAllProductModelFromWarehouseByIds(request, productIds) : null;
+
+            List<ProductModel> productModels = responseFromWareHouse != null ? responseFromWareHouse.getResult() : new ArrayList<>();
+
+            for (ExportingBillDto e : bill) {
+                CustomerModel customerModel = customerModels.stream().filter(customerModel1 -> customerModel1.getId().equals(e.getCustomer().getId()))
+                        .findFirst().orElse(null);
+                e.setCustomer(customerModel);
+            }
+            List<ExportingBillFullDto> exportingBillFullDtos = new ArrayList<>();
+
+            for (int i = 0; i < Math.min(transactions.size(), bill.size()); i++) {
+
+                ExportingBillTransactionDto transaction = transactions.get(i);
+                ExportingBillDto billDto = bill.get(i);
+                ExportingBillFullDto exportingBillFullDto = new ExportingBillFullDto();
+                exportingBillFullDto.setExportingBill(billDto);
+                ProductModel productOfDetail = productModels
+                        .stream().filter(product -> product.getId().equals(transaction.getProduct().getId())).findFirst().orElse(null);
+                transaction.setProduct(productOfDetail);
+                List<ExportingBillTransactionDto> transactionList = new ArrayList<>();
+                transactionList.add(transaction);
+                exportingBillFullDto.setExportingBillTransactions(transactionList);
+                exportingBillFullDtos.add(exportingBillFullDto);
+            }
+
+
+            ExportingBillFullSearchDto result = new ExportingBillFullSearchDto();
+            result.setResult(exportingBillFullDtos);
+            return result;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
     @Override
     public List<ExportingBillFullDto> getAllExportingbill(HttpServletRequest request) throws IOException {
@@ -111,6 +167,7 @@ public class IExportingServiceImpl implements IExportingbillService {
             exportingBillTransactionDtos.removeAll(details);
             exportingBillFullDtos.add(export);
         }
+
         return exportingBillFullDtos;
     }
 

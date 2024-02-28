@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -41,7 +42,7 @@ public class ExportingbillController {
         }
     }
 
-    @GetMapping("/getAllExportingBill")
+    @PostMapping ("/getAllExportingBill")
     public ResponseEntity<?> getAllExportingbill(HttpServletRequest request) {
         try {
             List<ExportingBillFullDto> result = exportingbillService.getAllExportingbill(request);
@@ -51,6 +52,20 @@ public class ExportingbillController {
             logger.error(e.getMessage(), e);
             return ResponseEntity.ok(new ResponseDto(List.of("get all bill unsuccess"),
                     HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
+        }
+    }
+
+
+    @PostMapping ("/findExportingAll")
+    private ResponseEntity<?> seachAllExporting(HttpServletRequest request) {
+        try {
+            int a=0;
+            var result = exportingbillService.getAllExportingBillUseBaseSearch(request);
+            return ResponseEntity.ok(new ResponseDto(List.of("Successful for find!"), HttpStatus.OK.value(), result));
+
+        } catch (RuntimeException | IOException e) {
+            logger.error(e.getMessage(), e);
+            return ResponseEntity.ok(new ResponseDto(List.of("ngu"+e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
 
