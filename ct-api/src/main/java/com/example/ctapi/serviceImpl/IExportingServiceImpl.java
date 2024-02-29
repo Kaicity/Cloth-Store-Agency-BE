@@ -8,6 +8,7 @@ import com.example.ctcommon.enums.BillStatus;
 import com.example.ctcommon.enums.TypeBillRealTime;
 import com.example.ctcommondal.entity.ExportbillEntity;
 import com.example.ctcommondal.entity.ExportingBillTransactionEntity;
+import com.example.ctcommondal.entity.ImportingTransactionEntity;
 import com.example.ctcommondal.repository.IExportingTransactionRepository;
 import com.example.ctcommondal.repository.IExportingbillRepository;
 import com.example.ctcoremodel.CustomerModel;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +46,7 @@ public class IExportingServiceImpl implements IExportingbillService {
             ExportingBillDto tempEx = exportingBillFullDto.getExportingBill();
             if (tempEx.getCustomer() == null) {
 
-                CustomerModel customer=new  CustomerModel();
+                CustomerModel customer = new CustomerModel();
                 tempEx.setCustomer(customer);
             }
             ExportbillEntity exportbillEntity = IExportingbillMapper.INSTANCE.toFromExportingbillDto(exportingBillFullDto.getExportingBill());
@@ -122,6 +122,19 @@ public class IExportingServiceImpl implements IExportingbillService {
             ExportingBillFullSearchDto result = new ExportingBillFullSearchDto();
             result.setResult(exportingBillFullDtos);
             return result;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteExportingFullByid(String id) {
+        try {
+            List<ExportingBillTransactionEntity> importingTransactionEntities = iExportingTransactionRepository.findTransactionbyId(id);
+            iExportingTransactionRepository.deleteAll(importingTransactionEntities);
+            iExportingbillRepository.deleteById(id);
+
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;

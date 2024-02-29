@@ -15,4 +15,5 @@ public interface IExportingbillService {
 
     List<ProductModel> getTesTToWarehouse(HttpServletRequest request) throws IOException;
     ExportingBillFullSearchDto getAllExportingBillUseBaseSearch(HttpServletRequest request) throws  IOException;
+  void deleteExportingFullByid(String id);
 }

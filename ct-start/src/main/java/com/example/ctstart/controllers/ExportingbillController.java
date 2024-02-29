@@ -41,7 +41,18 @@ public class ExportingbillController {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deteleExporting(@PathVariable String id) {
+        try {
+            exportingbillService .deleteExportingFullByid(id);
+            return ResponseEntity.ok(new ResponseDto(List.of("get all importing success"),
+                    HttpStatus.OK.value(), "deleted : " + id));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return ResponseEntity.ok(new ResponseDto(List.of("get all importing unsuccess"),
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
+        }
+    }
     @PostMapping ("/getAllExportingBill")
     public ResponseEntity<?> getAllExportingbill(HttpServletRequest request) {
         try {
@@ -54,7 +65,6 @@ public class ExportingbillController {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
-
 
     @PostMapping ("/findExportingAll")
     private ResponseEntity<?> seachAllExporting(HttpServletRequest request) {
