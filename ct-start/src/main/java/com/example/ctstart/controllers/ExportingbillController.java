@@ -41,7 +41,17 @@ public class ExportingbillController {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
-    @DeleteMapping("/{id}")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getExportingById(HttpServletRequest request, @PathVariable String id) {
+        try {
+            var result = exportingbillService.getExportingById(request, id);
+            return ResponseEntity.ok(new ResponseDto(List.of("data get sucess"),
+                    HttpStatus.OK.value(), result));
+        } catch (RuntimeException | IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error get Payment: " + e.getMessage());
+        }
+    }
+    @DeleteMapping("{id}")
     public ResponseEntity<?> deteleExporting(@PathVariable String id) {
         try {
             exportingbillService .deleteExportingFullByid(id);
@@ -79,6 +89,17 @@ public class ExportingbillController {
         }
     }
 
+    @PostMapping("/updateExporting")
+    public ResponseEntity<?> updateExporting(@RequestBody ExportingBillFullDto exportingReturnBillFull) {
+        try {
+            int a = 0;
+            exportingbillService.updateImporting(exportingReturnBillFull);
+            return ResponseEntity.ok(new ResponseDto(List.of("data Updatating success"),
+                    HttpStatus.OK.value(), exportingReturnBillFull));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Payment: " + e.getMessage());
+        }
+    }
     @PostMapping("testSpr2")
     public void go() {
         messagingTemplate.convertAndSend("/topic/" + "billRealTimeSection",

@@ -69,7 +69,7 @@ public class IImportingServiceImpl implements IImportingService {
             String importingId = importingFull.getImporting().getId();
 
             // Xóa các PaymentTransaction trước
-            List<ImportingTransactionEntity> importingTransactionEntities = iImportingTransactionRepository.findImportingId(importingId);
+            List<ImportingTransactionEntity> importingTransactionEntities = iImportingTransactionRepository.findListImportingTransactionId(importingId);
             iImportingTransactionRepository.deleteAll(importingTransactionEntities);
 
             // Cập nhật thông tin của importing
@@ -110,7 +110,7 @@ public class IImportingServiceImpl implements IImportingService {
     @Override
     public void deleteImportingFullByid(String id) {
         try {
-            List<ImportingTransactionEntity> importingTransactionEntities = iImportingTransactionRepository.findImportingId(id);
+            List<ImportingTransactionEntity> importingTransactionEntities = iImportingTransactionRepository.findListImportingTransactionId(id);
             iImportingTransactionRepository.deleteAll(importingTransactionEntities);
             iImportingRepository.deleteById(id);
         } catch (Exception e) {
@@ -213,7 +213,7 @@ public class IImportingServiceImpl implements IImportingService {
             else importingDto.setSupplier(supplierModels.get(0));
 
 
-            List<ImportingTransactionEntity> importingTransactionEntities = iImportingTransactionRepository.findImportingId(id);
+            List<ImportingTransactionEntity> importingTransactionEntities = iImportingTransactionRepository.findListImportingTransactionId(id);
             List<ImportingTransactionDto> importingTransactionDtos = IImportingTransactionMapper
                     .INSTANCE.toFromImportingTransactionEntityList(importingTransactionEntities);
 

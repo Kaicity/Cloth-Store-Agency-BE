@@ -1,7 +1,6 @@
 package com.example.ctcommondal.repository;
 
 import com.example.ctcommondal.entity.ImportingTransactionEntity;
-import com.example.ctcommondal.entity.PaymentTransactionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +12,7 @@ public interface IImportingTransactionRepository extends JpaRepository<Importing
     List<ImportingTransactionEntity> getAllDetails(@Param("importingIds") List<String> importingIds);
 
     @Query("select i from ImportingTransactionEntity i WHERE i.importingId in :importingId")
-    List<ImportingTransactionEntity> findImportingId(@Param("importingId") String importingId);
+    List<ImportingTransactionEntity> findListImportingTransactionId(@Param("importingId") String importingId);
 
     @Query("select i from ImportingTransactionEntity i WHERE i.id in :id")
     ImportingTransactionEntity findImportingTransactionById(@Param("id") String id);

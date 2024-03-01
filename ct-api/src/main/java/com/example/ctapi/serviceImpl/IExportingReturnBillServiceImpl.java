@@ -3,16 +3,16 @@ package com.example.ctapi.serviceImpl;
 import com.example.ctapi.dtos.response.*;
 import com.example.ctapi.mappers.IExportingReturnBillMapper;
 import com.example.ctapi.mappers.IExportingReturnTransactionMapper;
-import com.example.ctapi.mappers.IImportingMapper;
 import com.example.ctapi.mappers.IImportingTransactionMapper;
 import com.example.ctapi.services.IExportingReturnBillService;
 import com.example.ctcommon.enums.ImportingStatus;
 import com.example.ctcommondal.entity.ExportingReturnBillEntity;
 import com.example.ctcommondal.entity.ExportingReturnTransactionEntity;
-import com.example.ctcommondal.entity.ImportingEntity;
 import com.example.ctcommondal.entity.ImportingTransactionEntity;
 import com.example.ctcommondal.repository.IExportingReturnBillRepository;
 import com.example.ctcommondal.repository.IExportingReturnTransactionRepository;
+import com.example.ctcommondal.repository.IImportingRepository;
+import com.example.ctcommondal.repository.IImportingTransactionRepository;
 import com.example.ctcoremodel.ProductModel;
 import com.example.ctcoremodel.ResponseModel;
 import com.example.ctcoremodel.SupplierModel;
@@ -38,6 +38,8 @@ public class IExportingReturnBillServiceImpl implements IExportingReturnBillServ
     private final IExportingReturnBillRepository exportingReturnBillRepository;
     private final IWarehouseRequestService warehouseRequestService;
     private final IExportingReturnTransactionRepository exportingReturnTransactionRepository;
+    private final IImportingRepository iImportingRepository;
+    private final IImportingTransactionRepository iImportingTransactionRepository;
 
     @Transactional
     @Override
@@ -133,7 +135,7 @@ public class IExportingReturnBillServiceImpl implements IExportingReturnBillServ
 
     @Transactional
     @Override
-    public ExportingReturnBillFullDto getExportingReturnById(HttpServletRequest request, String id)  throws IOException {
+    public ExportingReturnBillFullDto getExportingReturnById(HttpServletRequest request, String id) throws IOException {
         try {
             ExportingReturnBillEntity ExportingReturnEntity = exportingReturnBillRepository.findExportingReturnById(id);
             ExportingReturnBillDto ExportingReturnDto = IExportingReturnBillMapper.INSTANCE.toFromExportingReturnEntity(ExportingReturnEntity);
@@ -187,20 +189,24 @@ public class IExportingReturnBillServiceImpl implements IExportingReturnBillServ
 
     @Override
     public void updateExportingReturn(ExportingReturnBillFullDto exportingReturnBillFullDto) {
-            try {
-                String ExportingReturnId = exportingReturnBillFullDto.getExportingReturnBill().getId();
+        try {
+            String importId = exportingReturnBillFullDto.getExportingReturnBill().getImporting().getId();
+            List<ImportingTransactionEntity> listTransanOld = iImportingTransactionRepository.findListImportingTransactionId(importId);
+            List<ImportingTransactionDto> listTransactionDto = IImportingTransactionMapper.INSTANCE.toFromImportingTransactionEntityList(listTransanOld);
+            String id = exportingReturnBillFullDto.getExportingReturnTransactionList().get(0).getProduct().getId();
+            int quality = exportingReturnBillFullDto.getExportingReturnTransactionList().get(0).getQuantity();
 
-                // Xóa các PaymentTransaction trước
+            boolean anyMatch = listTransactionDto.stream()
+                    .anyMatch(e -> e.getProduct().equals(id) && quality <= e.getQuantity());
+            if (anyMatch) {
+                String ExportingReturnId = exportingReturnBillFullDto.getExportingReturnBill().getId();
                 List<ExportingReturnTransactionEntity> exportingReturnTransactionEntities = exportingReturnTransactionRepository
                         .findExportingReturnListId(ExportingReturnId);
                 exportingReturnTransactionRepository.deleteAll(exportingReturnTransactionEntities);
 
-
-                // Cập nhật thông tin của importing
                 ExportingReturnBillEntity ExportingEntity = exportingReturnBillRepository.findById(ExportingReturnId)
                         .orElseThrow(() -> new RuntimeException("Payment with id " + ExportingReturnId + " not found."));
 
-                // Cập nhật thông tin của importing từ importingDto
                 ExportingReturnBillDto updatedImportingDto = exportingReturnBillFullDto.getExportingReturnBill();
                 ExportingEntity.setCode(updatedImportingDto.getCode());
                 ExportingEntity.setStatus(updatedImportingDto.getStatus());
@@ -224,28 +230,43 @@ public class IExportingReturnBillServiceImpl implements IExportingReturnBillServ
                 // Lưu lại thông tin các ImportingTransactionEntity đã cập nhật
                 exportingReturnTransactionRepository.saveAll(ExportingReturnTransactionUpdate);
 
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-                throw e;
             }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw e;
+        }
 
     }
 
+    @Transactional
     @Override
     public void createExportingReturn(ExportingReturnBillFullDto exportingReturnBillFullDto) {
         try {
-            //set status Importing
-            exportingReturnBillFullDto.getExportingReturnBill().setStatus(ImportingStatus.UNCOMPLETE);
-            ExportingReturnBillEntity ExportingEntity = IExportingReturnBillMapper.INSTANCE.toFromImportingReturnbillDto(exportingReturnBillFullDto.getExportingReturnBill());
-            exportingReturnBillRepository.save(ExportingEntity);
 
-            //duyệt qua vòng lặp
-            for (ExportingReturnTransactionDto detail : exportingReturnBillFullDto.getExportingReturnTransactionList()) {
-                detail.setExportingReturnBill(exportingReturnBillFullDto.getExportingReturnBill());
+            String importId = exportingReturnBillFullDto.getExportingReturnBill().getImporting().getId();
+            List<ImportingTransactionEntity> listTransanOld = iImportingTransactionRepository.findListImportingTransactionId(importId);
+            List<ImportingTransactionDto> listTransactionDto = IImportingTransactionMapper.INSTANCE.toFromImportingTransactionEntityList(listTransanOld);
+            String id = exportingReturnBillFullDto.getExportingReturnTransactionList().get(0).getProduct().getId();
+            int quality = exportingReturnBillFullDto.getExportingReturnTransactionList().get(0).getQuantity();
+
+            boolean anyMatch = listTransactionDto.stream()
+                    .anyMatch(e -> e.getProduct().equals(id) && quality <= e.getQuantity());
+
+            if (anyMatch) {
+                // Nếu có, thực hiện cập nhật trạng thái và lưu dữ liệu
+                exportingReturnBillFullDto.getExportingReturnBill().setStatus(ImportingStatus.UNCOMPLETE);
+                ExportingReturnBillEntity exportingEntity = IExportingReturnBillMapper.INSTANCE.toFromImportingReturnbillDto(exportingReturnBillFullDto.getExportingReturnBill());
+                exportingReturnBillRepository.save(exportingEntity);
+
+                exportingReturnBillFullDto.getExportingReturnTransactionList().forEach(detail ->
+                        detail.setExportingReturnBill(exportingReturnBillFullDto.getExportingReturnBill()));
+
+                List<ExportingReturnTransactionEntity> exportingReturnTransactionEntities =
+                        IExportingReturnTransactionMapper.INSTANCE.toFromImportingReturnTransactionDtoList(exportingReturnBillFullDto.getExportingReturnTransactionList());
+
+                exportingReturnTransactionRepository.saveAll(exportingReturnTransactionEntities);
             }
-            List<ExportingReturnTransactionEntity> ExportingReturnTransactionEntities =
-                    IExportingReturnTransactionMapper.INSTANCE.toFromImportingReturnTransactionDtoList(exportingReturnBillFullDto.getExportingReturnTransactionList());
-            exportingReturnTransactionRepository.saveAll(ExportingReturnTransactionEntities);
+
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
