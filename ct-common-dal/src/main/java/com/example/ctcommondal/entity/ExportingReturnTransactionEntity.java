@@ -29,10 +29,4 @@ public class ExportingReturnTransactionEntity {
 
     @Column(name = "amount")
     private int amount;
-
-    @Column(name = "size")
-    private String size;
-
-    @Column(name = "color")
-    private String color;
 }

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @AllArgsConstructor
@@ -20,12 +21,16 @@ public class ExportingReturnBillDto {
     private Double total;
     @Enumerated(EnumType.STRING)
     private ImportingStatus status;
-    private LocalDateTime dateExport;
+    private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
     private ImportingDto importing;
 
     public ExportingReturnBillDto() {
         this.id = CreateRandomID.generatingUID();
-        this.code = CreateRandomID.generateRandomId("IP");
+        this.code = CreateRandomID.generateRandomId("ER");
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = currentDateTime.format(formatter);
+        this.dateCreated = LocalDateTime.parse(formattedDateTime, formatter);
     }
 }

@@ -230,7 +230,7 @@ public class IExportingReturnBillServiceImpl implements IExportingReturnBillServ
                     ExportingEntity.setSupplierId(updatedImportingDto.getSupplier().getId());
                     ExportingEntity.setAgencyId(updatedImportingDto.getAgency().getId());
                     ExportingEntity.setDateUpdated(LocalDateTime.now());
-                    ExportingEntity.setDateExport(updatedImportingDto.getDateExport());
+                    ExportingEntity.setDateExport(updatedImportingDto.getDateCreated());
 
                     // Lưu lại thông tin importing đã cập nhật
                     exportingReturnBillRepository.save(ExportingEntity);
@@ -256,48 +256,21 @@ public class IExportingReturnBillServiceImpl implements IExportingReturnBillServ
 
     @Transactional
     @Override
-    public void createExportingReturn(ExportingReturnBillFullDto exportingReturnBillFullDto) {
+    public void createExportingReturn(ExportingReturnBillFullDto exportingReturnBillFull) {
         try {
-            String importId = exportingReturnBillFullDto.getExportingReturnBill().getImporting().getId();
-            List<ImportingTransactionEntity> listTransanOld = iImportingTransactionRepository.findListImportingTransactionId(importId);
-            List<ImportingTransactionDto> listTransactionDto = IImportingTransactionMapper.INSTANCE.toFromImportingTransactionEntityList(listTransanOld);
+            //set status Importing
+            exportingReturnBillFull.getExportingReturnBill().setStatus(ImportingStatus.UNCOMPLETE);
+            ExportingReturnBillEntity exportingReturnBillEntity = IExportingReturnBillMapper.INSTANCE.toFromImportingReturnbillDto(exportingReturnBillFull.getExportingReturnBill());
+            exportingReturnBillRepository.save(exportingReturnBillEntity);
 
-            // Kiểm tra xem danh sách giao dịch nhập có rỗng hay không
-            if (!listTransactionDto.isEmpty()) {
-                for (ExportingReturnTransactionDto transaction : exportingReturnBillFullDto
-                        .getExportingReturnTransactionList()) {
-                    String id = transaction.getProduct().getId();
-                    int quantity = transaction.getQuantity();
-
-                    boolean isMatch = false; // Biến để kiểm tra xem có giao dịch nhập phù hợp hay không
-
-                    // Duyệt qua từng giao dịch nhập để kiểm tra
-                    for (ImportingTransactionDto importingTransaction : listTransactionDto) {
-                        if (importingTransaction.getProduct().equals(id) && quantity <= importingTransaction.getQuantity()) {
-                            isMatch = true;
-                            break;
-                        }
-                    }
-
-                    // Nếu không tìm thấy giao dịch nhập phù hợp, bỏ qua và tiếp tục với giao dịch kế tiếp
-                    if (!isMatch) {
-                        continue;
-                    }
-
-                    // Nếu có giao dịch nhập phù hợp, thực hiện cập nhật trạng thái và lưu dữ liệu
-                    exportingReturnBillFullDto.getExportingReturnBill().setStatus(ImportingStatus.UNCOMPLETE);
-                    ExportingReturnBillEntity exportingEntity = IExportingReturnBillMapper.INSTANCE.toFromImportingReturnbillDto(exportingReturnBillFullDto.getExportingReturnBill());
-                    exportingReturnBillRepository.save(exportingEntity);
-
-                    exportingReturnBillFullDto.getExportingReturnTransactionList().forEach(detail ->
-                            detail.setExportingReturnBill(exportingReturnBillFullDto.getExportingReturnBill()));
-
-                    List<ExportingReturnTransactionEntity> exportingReturnTransactionEntities =
-                            IExportingReturnTransactionMapper.INSTANCE.toFromImportingReturnTransactionDtoList(exportingReturnBillFullDto.getExportingReturnTransactionList());
-
-                    exportingReturnTransactionRepository.saveAll(exportingReturnTransactionEntities);
-                }
+            //duyệt qua vòng lặp
+            for (ExportingReturnTransactionDto detail : exportingReturnBillFull.getExportingReturnTransactionList()) {
+                detail.setExportingReturnBill(exportingReturnBillFull.getExportingReturnBill());
             }
+            List<ExportingReturnTransactionEntity> exportingReturnTransactionEntities =
+                    IExportingReturnTransactionMapper.INSTANCE.toFromImportingReturnTransactionDtoList(exportingReturnBillFull.getExportingReturnTransactionList());
+            exportingReturnTransactionRepository.saveAll(exportingReturnTransactionEntities);
+
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
