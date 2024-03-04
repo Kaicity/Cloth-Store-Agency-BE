@@ -1,15 +1,11 @@
 package com.example.ctapi.serviceImpl;
 
 import com.example.ctapi.dtos.response.*;
-import com.example.ctapi.mappers.IExportingbillTransactionMapper;
-import com.example.ctapi.mappers.IImportingReturnBIllTransactionMapper;
-import com.example.ctapi.mappers.IImportingReturnBillMapper;
+import com.example.ctapi.mappers.*;
 import com.example.ctapi.services.IImportingReturnService;
 import com.example.ctcommon.enums.BillStatus;
 import com.example.ctcommon.enums.TypeBillRealTime;
-import com.example.ctcommondal.entity.ExportingBillTransactionEntity;
-import com.example.ctcommondal.entity.ImportingBillReturnTransactionEntity;
-import com.example.ctcommondal.entity.ImportingReturnbillEntity;
+import com.example.ctcommondal.entity.*;
 import com.example.ctcommondal.repository.IExportingTransactionRepository;
 import com.example.ctcommondal.repository.IExportingbillRepository;
 import com.example.ctcommondal.repository.IImportingReturnBIllRepository;
@@ -229,12 +225,27 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
                     .toFromImportingReturnbillsDto(importingReturn);
             List<String> billId = billReturn.stream().map(ImportingReturnBIllDto::getId).collect(Collectors.toList());
 
-            List<ImportingBillReturnTransactionEntity> exportTransaction =
+            List<ImportingBillReturnTransactionEntity> exportReturnTransaction =
                     iImportingReturnTransactionRepository.getAllDetails(billId);
             List<ImportingReturnBillTransactionDto> transactions = IImportingReturnBIllTransactionMapper
-                    .INSTANCE.toImportingReturnBillTransactionsDto(exportTransaction);
+                    .INSTANCE.toImportingReturnBillTransactionsDto(exportReturnTransaction);
             List<String> customerId = billReturn.stream().map(ImportingReturnBIllDto::getCustomer).
                     map(CustomerModel::getId).collect(Collectors.toList());
+
+            List<String> Ids = billReturn.stream()
+                    .map(ImportingReturnBIllDto::getExporting)
+                    .map(ExportingBillDto::getId)
+                    .collect(Collectors.toList());
+
+            List<ExportbillEntity> exportingEntities = iExportingbillRepository.findAllExportingIds(Ids);
+            List<ExportingBillDto> exportingDtos = IExportingbillMapper.INSTANCE
+                    .toFromExportingbillDto(exportingEntities);
+            for (ImportingReturnBIllDto exporting : billReturn) {
+                List<ExportingBillDto> result = exportingDtos.stream()
+                        .filter(option ->exporting.getExporting().getId().equals(option.getId()))
+                        .collect(Collectors.toList());
+                exporting.setExporting(result.size() == 0 ? null : result.get(0));
+            }
 
             ResponseModel<List<CustomerModel>> reponeFromWareHouseCustomer = warehouseRequestService
                     .getCustomerModelFromWarehouseByIds(request, customerId);

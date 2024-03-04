@@ -13,4 +13,7 @@ public interface IExportingbillRepository extends JpaRepository<ExportbillEntity
     List<ExportbillEntity> getAllBill();
     @Query("SELECT i FROM ExportbillEntity i WHERE i.id = :id ")
     ExportbillEntity findImportingById(@Param("id") String id);
+    @Query("SELECT c FROM ExportbillEntity c WHERE c.id in :ids  ")
+    List<ExportbillEntity> findAllExportingIds(@Param("ids") List<String> ids);
+
 }
