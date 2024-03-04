@@ -16,6 +16,7 @@ public interface IImportingMapper {
     @Mapping(target = "supplierId", source = "supplier.id")
     @Mapping(target = "status", source = "status")
     ImportingEntity toFromImportingDto(ImportingDto importingDto);
+    List<ImportingEntity> toFromImportingsDto(List<ImportingDto> importingDto);
 
     @Mapping(target = "agency.id",source = "agencyId")
     @Mapping(target = "supplier.id",source = "supplierId")
