@@ -1,5 +1,9 @@
 package com.example.ctcommondal.entity;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "exporting_transaction")
-public class ExportingBillTransactionEntity {
+@Table(name = "Importing_Return_transaction")
+public class ImportingBillReturnTransactionEntity {
     @Id
     private String id;
 
@@ -33,4 +37,3 @@ public class ExportingBillTransactionEntity {
     @Column(name = "color")
     private String color;
 }
-

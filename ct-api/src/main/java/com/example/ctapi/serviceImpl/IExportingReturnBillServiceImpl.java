@@ -3,11 +3,13 @@ package com.example.ctapi.serviceImpl;
 import com.example.ctapi.dtos.response.*;
 import com.example.ctapi.mappers.IExportingReturnBillMapper;
 import com.example.ctapi.mappers.IExportingReturnTransactionMapper;
+import com.example.ctapi.mappers.IImportingMapper;
 import com.example.ctapi.mappers.IImportingTransactionMapper;
 import com.example.ctapi.services.IExportingReturnBillService;
 import com.example.ctcommon.enums.ImportingStatus;
 import com.example.ctcommondal.entity.ExportingReturnBillEntity;
 import com.example.ctcommondal.entity.ExportingReturnTransactionEntity;
+import com.example.ctcommondal.entity.ImportingEntity;
 import com.example.ctcommondal.entity.ImportingTransactionEntity;
 import com.example.ctcommondal.repository.IExportingReturnBillRepository;
 import com.example.ctcommondal.repository.IExportingReturnTransactionRepository;
@@ -50,12 +52,24 @@ public class IExportingReturnBillServiceImpl implements IExportingReturnBillServ
             List<ExportingReturnBillEntity> exportingReturnEntities = this.exportingReturnBillRepository.findAll();
             List<ExportingReturnBillDto> ExportingDtos = IExportingReturnBillMapper.
                     INSTANCE.toFromListExportingReturnbillEntity(exportingReturnEntities);
-
-            //Trả về danh sách id supplier theo importing
+            //Trả về danh sách id importing theo exportingReturn
             List<String> ExportIds = ExportingDtos.stream()
                     .map(ExportingReturnBillDto::getSupplier)
                     .map(SupplierModel::getId)
                     .collect(Collectors.toList());
+            List<String> Ids = ExportingDtos.stream()
+                    .map(ExportingReturnBillDto::getImporting)
+                    .map(ImportingDto::getId)
+                    .collect(Collectors.toList());
+            List<ImportingEntity> importingEntities = iImportingRepository.findAllImportingIds(Ids);
+            List<ImportingDto> ImportingDtos = IImportingMapper.INSTANCE.toFromImportingEntityList(importingEntities);
+
+            for (ExportingReturnBillDto importing : ExportingDtos) {
+                List<ImportingDto> result = ImportingDtos.stream()
+                        .filter(option ->importing.getImporting().getId().equals(option.getId()))
+                        .collect(Collectors.toList());
+                importing.setImporting(result.size() == 0 ? null : result.get(0));
+            }
 
             ResponseModel<List<SupplierModel>> responseFromWareHouseSupplier = !ExportingDtos.isEmpty() ? warehouseRequestService
                     .getSupplierFromWarehouseByIds(request, ExportIds) : null;
