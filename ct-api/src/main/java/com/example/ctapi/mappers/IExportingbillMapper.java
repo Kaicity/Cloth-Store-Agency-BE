@@ -16,12 +16,13 @@ public interface IExportingbillMapper {
     @Mapping(target = "customerId", source = "customer.id")
     @Mapping(target = "agencyId", source = "agency.id")
     @Mapping(target = "dateExport", source = "dateExport")
-    ExportbillEntity toFromExportingbillDto(ExportingBillDto exportingBillDto);
+    @Mapping(target = "eid",source = "customerNotLogin.eid")
+    ExportbillEntity toFromExportingbillEntity(ExportingBillDto exportingBillDto);
 
     @Mapping(target = "status", source = "status")
     @Mapping(target = "customer.id", source = "customerId")
     @Mapping(target = "agency.id", source = "agencyId")
-    ExportingBillDto toFromExportingbillDtoList(ExportbillEntity exportingBillDto);
+    ExportingBillDto toFromExportingbillDto(ExportbillEntity exportingBillDto);
 
-    List<ExportingBillDto>toFromExportingbillDtoList(List<ExportbillEntity> exportingBillDto);
+    List<ExportingBillDto> toFromExportingbillDto(List<ExportbillEntity> exportingBillDto);
 }

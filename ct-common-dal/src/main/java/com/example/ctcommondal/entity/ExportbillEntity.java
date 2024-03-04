@@ -42,4 +42,19 @@ public class ExportbillEntity {
     @Column(name = "agency_id")
     private String agencyId;
 
+    @Column(name = "eCustomer_ID")
+    private String eid;
+
+    @Column(name = "fullname")
+    private String fullName;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "address")
+    private String address;
+
 }

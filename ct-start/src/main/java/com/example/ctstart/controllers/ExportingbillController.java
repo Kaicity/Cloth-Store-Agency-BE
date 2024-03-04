@@ -15,11 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -43,8 +41,29 @@ public class ExportingbillController {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
-
-    @PostMapping("/getAllExportingBill")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getExportingById(HttpServletRequest request, @PathVariable String id) {
+        try {
+            var result = exportingbillService.getExportingById(request, id);
+            return ResponseEntity.ok(new ResponseDto(List.of("data get sucess"),
+                    HttpStatus.OK.value(), result));
+        } catch (RuntimeException | IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error get Payment: " + e.getMessage());
+        }
+    }
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deteleExporting(@PathVariable String id) {
+        try {
+            exportingbillService .deleteExportingFullByid(id);
+            return ResponseEntity.ok(new ResponseDto(List.of("get all importing success"),
+                    HttpStatus.OK.value(), "deleted : " + id));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return ResponseEntity.ok(new ResponseDto(List.of("get all importing unsuccess"),
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
+        }
+    }
+    @PostMapping ("/getAllExportingBill")
     public ResponseEntity<?> getAllExportingbill(HttpServletRequest request) {
         try {
             List<ExportingBillFullDto> result = exportingbillService.getAllExportingbill(request);
@@ -57,6 +76,30 @@ public class ExportingbillController {
         }
     }
 
+    @PostMapping ("/findExportingAll")
+    private ResponseEntity<?> seachAllExporting(HttpServletRequest request) {
+        try {
+            int a=0;
+            var result = exportingbillService.getAllExportingBillUseBaseSearch(request);
+            return ResponseEntity.ok(new ResponseDto(List.of("Successful for find!"), HttpStatus.OK.value(), result));
+
+        } catch (RuntimeException | IOException e) {
+            logger.error(e.getMessage(), e);
+            return ResponseEntity.ok(new ResponseDto(List.of("ngu"+e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
+        }
+    }
+
+    @PostMapping("/updateExporting")
+    public ResponseEntity<?> updateExporting(@RequestBody ExportingBillFullDto exportingReturnBillFull) {
+        try {
+            int a = 0;
+            exportingbillService.updateImporting(exportingReturnBillFull);
+            return ResponseEntity.ok(new ResponseDto(List.of("data Updatating success"),
+                    HttpStatus.OK.value(), exportingReturnBillFull));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Payment: " + e.getMessage());
+        }
+    }
     @PostMapping("testSpr2")
     public void go() {
         messagingTemplate.convertAndSend("/topic/" + "billRealTimeSection",

@@ -23,6 +23,7 @@ public class ExportingBillDto {
     private BillStatus status;
     private CustomerModel customer;
     private AgencyDto agency;
+    private CustomerNotLoginDto customerNotLogin;
 
     public ExportingBillDto() {
         this.id = CreateRandomID.generatingUID();
