@@ -63,12 +63,12 @@ public class ExportingReturnBillController {
     }
 
     @PostMapping("/updateExportingReturn")
-    public ResponseEntity<?> updatePayment(@RequestBody ExportingReturnBillFullDto exportingReturnBillFullDto) {
+    public ResponseEntity<?> updatePayment(@RequestBody ExportingReturnBillFullDto exportingReturnBillFull) {
         try {
             int a = 0;
-            iExportingReturnService.updateExportingReturn(exportingReturnBillFullDto);
+            iExportingReturnService.updateExportingReturn(exportingReturnBillFull);
             return ResponseEntity.ok(new ResponseDto(List.of("data Updatating success"),
-                    HttpStatus.OK.value(), exportingReturnBillFullDto));
+                    HttpStatus.OK.value(), exportingReturnBillFull));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Payment: " + e.getMessage());
         }

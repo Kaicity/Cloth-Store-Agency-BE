@@ -41,7 +41,28 @@ public class ExportingbillController {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
-
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getExportingById(HttpServletRequest request, @PathVariable String id) {
+        try {
+            var result = exportingbillService.getExportingById(request, id);
+            return ResponseEntity.ok(new ResponseDto(List.of("data get sucess"),
+                    HttpStatus.OK.value(), result));
+        } catch (RuntimeException | IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error get Payment: " + e.getMessage());
+        }
+    }
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deteleExporting(@PathVariable String id) {
+        try {
+            exportingbillService .deleteExportingFullByid(id);
+            return ResponseEntity.ok(new ResponseDto(List.of("get all importing success"),
+                    HttpStatus.OK.value(), "deleted : " + id));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return ResponseEntity.ok(new ResponseDto(List.of("get all importing unsuccess"),
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
+        }
+    }
     @PostMapping ("/getAllExportingBill")
     public ResponseEntity<?> getAllExportingbill(HttpServletRequest request) {
         try {
@@ -54,7 +75,6 @@ public class ExportingbillController {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
-
 
     @PostMapping ("/findExportingAll")
     private ResponseEntity<?> seachAllExporting(HttpServletRequest request) {
@@ -69,6 +89,17 @@ public class ExportingbillController {
         }
     }
 
+    @PostMapping("/updateExporting")
+    public ResponseEntity<?> updateExporting(@RequestBody ExportingBillFullDto exportingReturnBillFull) {
+        try {
+            int a = 0;
+            exportingbillService.updateImporting(exportingReturnBillFull);
+            return ResponseEntity.ok(new ResponseDto(List.of("data Updatating success"),
+                    HttpStatus.OK.value(), exportingReturnBillFull));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Payment: " + e.getMessage());
+        }
+    }
     @PostMapping("testSpr2")
     public void go() {
         messagingTemplate.convertAndSend("/topic/" + "billRealTimeSection",
