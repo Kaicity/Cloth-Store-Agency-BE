@@ -4,6 +4,7 @@ import com.example.ctapi.dtos.response.*;
 import com.example.ctapi.mappers.*;
 import com.example.ctapi.services.IImportingReturnService;
 import com.example.ctcommon.enums.BillStatus;
+import com.example.ctcommon.enums.ImportingReturnStatus;
 import com.example.ctcommon.enums.TypeBillRealTime;
 import com.example.ctcommondal.entity.*;
 import com.example.ctcommondal.repository.IExportingTransactionRepository;
@@ -43,57 +44,27 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
     @Override
     public void createImportingReturnbill(ImportingReturnBillFullDto importingReturnBIll) {
         try {
-            String importId = importingReturnBIll.getImportbill().getExporting().getId();
-            List<ExportingBillTransactionEntity> listTransanOld = iExportingTransactionRepository.findTransactionbyId(importId);
-            List<ExportingBillTransactionDto> listTransactionDto = IExportingbillTransactionMapper
-                    .INSTANCE.toExportingBillTransactionDtoList(listTransanOld);
+            // thêm vào thông tin chung của đơn hàng
+            importingReturnBIll.getImportingReturn().setStatus(ImportingReturnStatus.COMPELETED);
 
-            // Kiểm tra xem danh sách giao dịch nhập có rỗng hay không
-            if (!listTransactionDto.isEmpty()) {
-                for (ImportingReturnBillTransactionDto transaction : importingReturnBIll
-                        .getImportingTransactions()) {
-                    String id = transaction.getProduct().getId();
-                    int quantity = transaction.getQuantity();
+            ImportingReturnBIllDto tempEx = importingReturnBIll.getImportingReturn();
+            if (tempEx.getCustomer() == null) {
 
-                    boolean isMatch = false;
-                    // Duyệt qua từng giao dịch nhập để kiểm tra
-                    for (ExportingBillTransactionDto ExportingTransaction : listTransactionDto) {
-                        if (ExportingTransaction.getProduct().equals(id) && quantity <= ExportingTransaction.getQuantity()) {
-                            isMatch = true;
-                            break;
-                        }
-                    }
+                CustomerModel customer = new CustomerModel();
+                tempEx.setCustomer(customer);
+            }
+            ImportingReturnbillEntity importingReturnbillEntity = IImportingReturnBillMapper.INSTANCE.toFromExportingReturnbillEntity(importingReturnBIll.getImportingReturn());
+            iImportingReturnBIllRepository.save(importingReturnbillEntity);
+            // thêm vào chi tiet don hang
+            for (ImportingReturnBillTransactionDto detail : importingReturnBIll.getImportingReturnTransactionModels()) {
+                detail.setBill(importingReturnBIll.getImportingReturn());
+            }
 
-                    // Nếu không tìm thấy giao dịch nhập phù hợp, bỏ qua và tiếp tục với giao dịch kế tiếp
-                    if (!isMatch) {
-                        continue;
-                    }
-                    // thêm vào thông tin chung của đơn hàng
-                    importingReturnBIll.getImportbill().setStatus(BillStatus.BOOKING);
+            List<ImportingBillReturnTransactionEntity> importingBillReturnTransactionEntities = IImportingReturnBIllTransactionMapper.
+                    INSTANCE.toFromImportingReturnbillTransactionsDto(importingReturnBIll.getImportingReturnTransactionModels());
 
-                    ImportingReturnBIllDto tempEx = importingReturnBIll.getImportbill();
-                    if (tempEx.getCustomer() == null) {
-
-                        CustomerModel customer = new CustomerModel();
-                        tempEx.setCustomer(customer);
-                    }
-                    ImportingReturnbillEntity importreturnbillEntity = IImportingReturnBillMapper.INSTANCE.toFromExportingReturnbillEntity(importingReturnBIll.getImportbill());
-                    iImportingReturnBIllRepository.save(importreturnbillEntity);
-                    // thêm vào chi tiet don hang
-                    for (ImportingReturnBillTransactionDto detail : importingReturnBIll.getImportingTransactions()) {
-                        detail.setBill(importingReturnBIll.getImportbill());
-                    }
-
-                    List<ImportingBillReturnTransactionEntity> importingReturnBillTransactionEntity = IImportingReturnBIllTransactionMapper.
-                            INSTANCE.toFromImportingReturnbillTransactionsDto(importingReturnBIll.getImportingTransactions());
-
-                    for (ImportingBillReturnTransactionEntity detail : importingReturnBillTransactionEntity) {
-                        iImportingReturnTransactionRepository.save(detail);
-                    }
-
-                    messagingTemplate.convertAndSend("/topic/" + "billRealTimeSection",
-                            new SocketMessage("billRealTimeSection", TypeBillRealTime.BOOKING.toString(), importingReturnBIll));
-                }
+            for (ImportingBillReturnTransactionEntity detail : importingBillReturnTransactionEntities) {
+                iImportingReturnTransactionRepository.save(detail);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -148,8 +119,8 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
             }
 
             ImportingReturnBillFullDto ImportingFullDto = new ImportingReturnBillFullDto();
-            ImportingFullDto.setImportbill(exportingDto);
-            ImportingFullDto.setImportingTransactions(ExportingTransactionDtos);
+            ImportingFullDto.setImportingReturn(exportingDto);
+            ImportingFullDto.setImportingReturnTransactionModels(ExportingTransactionDtos);
             return ImportingFullDto;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -198,7 +169,7 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
         List<ImportingReturnBillFullDto> exportingBillFullDtos = new ArrayList<>();
         for (ImportingReturnBIllDto e : ImportingReturnBillDtos) {
             ImportingReturnBillFullDto export = new ImportingReturnBillFullDto();
-            export.setImportbill(e);
+            export.setImportingReturn(e);
             //lấy hết tất cả chi tiết
             List<ImportingReturnBillTransactionDto> details = exportingBillTransactionDtos
                     .stream().filter(detail -> detail.getBill().getId().equals(e.getId())).collect(Collectors.toList());
@@ -208,7 +179,7 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
                         .stream().filter(product -> product.getId().equals(detail.getProduct().getId())).findFirst().orElse(null);
                 detail.setProduct(productOfDetail);
             }
-            export.setImportingTransactions(details);
+            export.setImportingReturnTransactionModels(details);
             exportingBillTransactionDtos.removeAll(details);
             exportingBillFullDtos.add(export);
         }
@@ -220,69 +191,56 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
     public ImportingReturnBillSearchDto getAllImportingReturnBillUseBaseSearch(HttpServletRequest request) throws IOException {
         int a = 0;
         try {
-            List<ImportingReturnbillEntity> importingReturn = iImportingReturnBIllRepository.findAll();
-            List<ImportingReturnBIllDto> billReturn = IImportingReturnBillMapper.INSTANCE
-                    .toFromImportingReturnbillsDto(importingReturn);
-            List<String> billId = billReturn.stream().map(ImportingReturnBIllDto::getId).collect(Collectors.toList());
+            List<ImportingReturnbillEntity> exportReturnbillEntities = this.iImportingReturnBIllRepository.getAllBill();
+            List<ImportingReturnBIllDto> ImportingReturnBillDtos = IImportingReturnBillMapper.INSTANCE.toFromImportingReturnbillsDto(exportReturnbillEntities);
 
-            List<ImportingBillReturnTransactionEntity> exportReturnTransaction =
-                    iImportingReturnTransactionRepository.getAllDetails(billId);
-            List<ImportingReturnBillTransactionDto> transactions = IImportingReturnBIllTransactionMapper
-                    .INSTANCE.toImportingReturnBillTransactionsDto(exportReturnTransaction);
-            List<String> customerId = billReturn.stream().map(ImportingReturnBIllDto::getCustomer).
-                    map(CustomerModel::getId).collect(Collectors.toList());
+            List<String> ids = ImportingReturnBillDtos.stream().map(ImportingReturnBIllDto::getId).collect(Collectors.toList());
 
-            List<String> Ids = billReturn.stream()
-                    .map(ImportingReturnBIllDto::getExporting)
-                    .map(ExportingBillDto::getId)
+            List<ImportingBillReturnTransactionEntity> exportingBillTransactionEntities = this.iImportingReturnTransactionRepository.getAllDetails(ids);
+            List<ImportingReturnBillTransactionDto> exportingBillTransactionDtos = IImportingReturnBIllTransactionMapper.
+                    INSTANCE.toImportingReturnBillTransactionsDto(exportingBillTransactionEntities);
+
+            //Trả về danh sách id supplier theo importing
+            List<String> customerIds =ImportingReturnBillDtos.stream()
+                    .map(ImportingReturnBIllDto::getCustomer).map(CustomerModel::getId).distinct()
                     .collect(Collectors.toList());
 
-            List<ExportbillEntity> exportingEntities = iExportingbillRepository.findAllExportingIds(Ids);
-            List<ExportingBillDto> exportingDtos = IExportingbillMapper.INSTANCE
-                    .toFromExportingbillDto(exportingEntities);
-            for (ImportingReturnBIllDto exporting : billReturn) {
-                List<ExportingBillDto> result = exportingDtos.stream()
-                        .filter(option ->exporting.getExporting().getId().equals(option.getId()))
-                        .collect(Collectors.toList());
-                exporting.setExporting(result.size() == 0 ? null : result.get(0));
-            }
-
             ResponseModel<List<CustomerModel>> reponeFromWareHouseCustomer = warehouseRequestService
-                    .getCustomerModelFromWarehouseByIds(request, customerId);
+                    .getCustomerModelFromWarehouseByIds(request, customerIds);
             List<CustomerModel> customerModels = reponeFromWareHouseCustomer != null ? reponeFromWareHouseCustomer.getResult() : new ArrayList<>();
 
-            List<String> productIds = transactions.stream()
+
+            //lấy ra hết ids sản phẩm để gọi qua warehouse lấy full thông tin
+            List<String> productIds = exportingBillTransactionDtos.stream()
                     .map(ImportingReturnBillTransactionDto::getProduct).map(ProductModel::getId).distinct()
                     .collect(Collectors.toList());
 
             ResponseModel<List<ProductModel>> responseFromWareHouse = productIds.size() > 0 ? warehouseRequestService
                     .getAllProductModelFromWarehouseByIds(request, productIds) : null;
 
-            List<ProductModel> productModels =
-                    responseFromWareHouse != null ? responseFromWareHouse.getResult() : new ArrayList<>();
+            List<ProductModel> productModels = responseFromWareHouse != null ? responseFromWareHouse.getResult() : new ArrayList<>();
 
-            for (ImportingReturnBIllDto e : billReturn) {
-                CustomerModel customerModel = customerModels.stream()
-                        .filter(customerModel1 -> customerModel1.getId().equals(e.getCustomer().getId()))
-                        .findFirst().orElse(null);
-                e.setCustomer(customerModel);
-            }
+            // duyệt qua từng hóa đơn đặt hàng
             List<ImportingReturnBillFullDto> exportingBillFullDtos = new ArrayList<>();
+            for (ImportingReturnBIllDto e : ImportingReturnBillDtos) {
+                ImportingReturnBillFullDto export = new ImportingReturnBillFullDto();
+                export.setImportingReturn(e);
 
-            for (int i = 0; i < Math.min(transactions.size(), billReturn.size()); i++) {
-
-                ImportingReturnBillTransactionDto transaction = transactions.get(i);
-                ImportingReturnBIllDto billDto = billReturn.get(i);
-                ImportingReturnBillFullDto exportingBillFullDto = new ImportingReturnBillFullDto();
-                exportingBillFullDto.setImportbill(billDto);
-                ProductModel productOfDetail = productModels
-                        .stream().filter(product -> product.getId().equals(
-                                transaction.getProduct().getId())).findFirst().orElse(null);
-                transaction.setProduct(productOfDetail);
-                List<ImportingReturnBillTransactionDto> transactionList = new ArrayList<>();
-                transactionList.add(transaction);
-                exportingBillFullDto.setImportingTransactions(transactionList);
-                exportingBillFullDtos.add(exportingBillFullDto);
+                CustomerModel customerDetaild = customerModels
+                        .stream().filter(customer -> customer.getId().equals(e.getCustomer().getId())).findFirst().orElse(null);
+                e.setCustomer(customerDetaild);
+                //lấy hết tất cả chi tiết
+                List<ImportingReturnBillTransactionDto> details = exportingBillTransactionDtos
+                        .stream().filter(detail -> detail.getBill().getId().equals(e.getId())).collect(Collectors.toList());
+                for (ImportingReturnBillTransactionDto detail : details) {
+                    detail.setBill(null);
+                    ProductModel productOfDetail = productModels
+                            .stream().filter(product -> product.getId().equals(detail.getProduct().getId())).findFirst().orElse(null);
+                    detail.setProduct(productOfDetail);
+                }
+                export.setImportingReturnTransactionModels(details);
+                exportingBillTransactionDtos.removeAll(details);
+                exportingBillFullDtos.add(export);
             }
 
 
@@ -299,7 +257,7 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
     @Override
     public void updateImportingReturn(ImportingReturnBillFullDto importingReturnBillFullDto) {
         try {
-            String importId = importingReturnBillFullDto.getImportbill().getExporting().getId();
+            String importId = importingReturnBillFullDto.getImportingReturn().getExporting().getId();
             List<ExportingBillTransactionEntity> listTransanOld = iExportingTransactionRepository.findTransactionbyId(importId);
             List<ExportingBillTransactionDto> listTransactionDto = IExportingbillTransactionMapper
                     .INSTANCE.toExportingBillTransactionDtoList(listTransanOld);
@@ -307,7 +265,7 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
             // Kiểm tra xem danh sách giao dịch nhập có rỗng hay không
             if (!listTransactionDto.isEmpty()) {
                 for (ImportingReturnBillTransactionDto transaction : importingReturnBillFullDto
-                        .getImportingTransactions()) {
+                        .getImportingReturnTransactionModels()) {
                     String id = transaction.getProduct().getId();
                     int quantity = transaction.getQuantity();
 
@@ -324,7 +282,7 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
                     if (!isMatch) {
                         continue;
                     }
-                    String exportingId = importingReturnBillFullDto.getImportbill().getId();
+                    String exportingId = importingReturnBillFullDto.getImportingReturn().getId();
 
                     List<ImportingBillReturnTransactionEntity> exportingTransactionEntities = iImportingReturnTransactionRepository
                             .findTransactionbyId(exportingId);
@@ -335,7 +293,7 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
                             .orElseThrow(() -> new RuntimeException("Payment with id " + exportingId + " not found."));
 
                     // Cập nhật thông tin của importing từ importingDto
-                    ImportingReturnBIllDto updatedExportingDto = importingReturnBillFullDto.getImportbill();
+                    ImportingReturnBIllDto updatedExportingDto = importingReturnBillFullDto.getImportingReturn();
                     exportingEntity.setCode(updatedExportingDto.getCode());
                     exportingEntity.setStatus(updatedExportingDto.getStatus());
                     exportingEntity.setTotal(updatedExportingDto.getTotal());
@@ -347,7 +305,7 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
                     iImportingReturnBIllRepository.save(exportingEntity);
 
                     List<ImportingBillReturnTransactionEntity> exportingTransactionUpdate = IImportingReturnBIllTransactionMapper
-                            .INSTANCE.toFromImportingReturnbillTransactionsDto(importingReturnBillFullDto.getImportingTransactions());
+                            .INSTANCE.toFromImportingReturnbillTransactionsDto(importingReturnBillFullDto.getImportingReturnTransactionModels());
 
                     // Cập nhật lại exportingId cho các ImportingTransactionEntity
                     for (ImportingBillReturnTransactionEntity transactionEntity : exportingTransactionUpdate) {

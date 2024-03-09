@@ -10,6 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ImportingReturnBillFullDto {
-    ImportingReturnBIllDto importbill;
-    List<ImportingReturnBillTransactionDto> ImportingTransactions;
+    ImportingReturnBIllDto importingReturn;
+    List<ImportingReturnBillTransactionDto> importingReturnTransactionModels;
 }

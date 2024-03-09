@@ -4,7 +4,6 @@ import com.example.ctapi.dtos.BussinessLogic.CreateRandomID;
 import com.example.ctcoremodel.ProductModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor

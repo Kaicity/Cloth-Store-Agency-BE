@@ -1,7 +1,6 @@
 package com.example.ctstart.controllers;
 
 import com.example.ctapi.dtos.response.ExportingReturnBillFullDto;
-import com.example.ctapi.dtos.response.ImportingFullDto;
 import com.example.ctapi.dtos.response.ResponseDto;
 import com.example.ctapi.services.IExportingReturnBillService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,12 +62,12 @@ public class ExportingReturnBillController {
     }
 
     @PostMapping("/updateExportingReturn")
-    public ResponseEntity<?> updatePayment(@RequestBody ExportingReturnBillFullDto exportingReturnBillFull) {
+    public ResponseEntity<?> updateExportingReturn(@RequestBody ExportingReturnBillFullDto exportingReturnFull) {
         try {
             int a = 0;
-            iExportingReturnService.updateExportingReturn(exportingReturnBillFull);
+            iExportingReturnService.updateExportingReturn(exportingReturnFull);
             return ResponseEntity.ok(new ResponseDto(List.of("data Updatating success"),
-                    HttpStatus.OK.value(), exportingReturnBillFull));
+                    HttpStatus.OK.value(), exportingReturnFull));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Payment: " + e.getMessage());
         }
