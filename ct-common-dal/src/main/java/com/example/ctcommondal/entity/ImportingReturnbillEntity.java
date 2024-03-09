@@ -1,6 +1,7 @@
 package com.example.ctcommondal.entity;
 
 import com.example.ctcommon.enums.BillStatus;
+import com.example.ctcommon.enums.ImportingReturnStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,7 +39,7 @@ public class ImportingReturnbillEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private BillStatus status;
+    private ImportingReturnStatus status;
 
     @Column(name = "customer_id")
     private String customerId;

@@ -2,6 +2,7 @@ package com.example.ctapi.dtos.response;
 
 import com.example.ctapi.dtos.BussinessLogic.CreateRandomID;
 import com.example.ctcommon.enums.BillStatus;
+import com.example.ctcommon.enums.ImportingReturnStatus;
 import com.example.ctcoremodel.CustomerModel;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,7 +22,7 @@ public class ImportingReturnBIllDto {
     private LocalDateTime dateCreated;
     private Double total;
     @Enumerated(EnumType.STRING)
-    private BillStatus status;
+    private ImportingReturnStatus status;
     private CustomerModel customer;
     private AgencyDto agency;
     private CustomerNotLoginDto customerNotLogin;
