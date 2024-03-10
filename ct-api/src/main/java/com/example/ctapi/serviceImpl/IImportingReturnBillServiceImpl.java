@@ -189,7 +189,6 @@ public class IImportingReturnBillServiceImpl implements IImportingReturnService 
     @Transactional
     @Override
     public ImportingReturnBillSearchDto getAllImportingReturnBillUseBaseSearch(HttpServletRequest request) throws IOException {
-        int a = 0;
         try {
             List<ImportingReturnbillEntity> exportReturnbillEntities = this.iImportingReturnBIllRepository.getAllBill();
             List<ImportingReturnBIllDto> ImportingReturnBillDtos = IImportingReturnBillMapper.INSTANCE.toFromImportingReturnbillsDto(exportReturnbillEntities);
