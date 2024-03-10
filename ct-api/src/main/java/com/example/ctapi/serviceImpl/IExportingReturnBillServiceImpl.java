@@ -273,6 +273,7 @@ public class IExportingReturnBillServiceImpl implements IExportingReturnBillServ
     public void createExportingReturn(ExportingReturnBillFullDto exportingReturnBillFull) {
         try {
             //set status Importing
+           int a=0;
             ExportingReturnBillEntity exportingReturnBillEntity = IExportingReturnBillMapper.INSTANCE.toFromImportingReturnbillDto(exportingReturnBillFull.getExportingReturnBill());
             exportingReturnBillRepository.save(exportingReturnBillEntity);
 

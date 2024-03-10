@@ -24,7 +24,6 @@ public class ExportingReturnBillController {
     private IExportingReturnBillService iExportingReturnService;
     @PostMapping("/getAllExportingReturn")
     public ResponseEntity<?> getAllExportingReturn(HttpServletRequest request) {
-        int a = 0;
         try {
             var result = iExportingReturnService.getAllExportingReturnFull(request);
             return ResponseEntity.ok(new ResponseDto(List.of("get all importing success"),
@@ -73,8 +72,9 @@ public class ExportingReturnBillController {
         }
     }
     @PostMapping("/createExportingReturn")
-    public ResponseEntity<?> createImporting(@RequestBody ExportingReturnBillFullDto exportingReturnBillFullDto) {
+    public ResponseEntity<?> addExportingReturn(@RequestBody ExportingReturnBillFullDto exportingReturnBillFullDto) {
         try {
+            int a=0;
             iExportingReturnService.createExportingReturn(exportingReturnBillFullDto);
             return ResponseEntity.ok(new ResponseDto(List.of("data created success"),
                     HttpStatus.OK.value(), exportingReturnBillFullDto));
