@@ -15,6 +15,7 @@ public class WebSocketController {
         this.messagingTemplate = messagingTemplate;
     }
 
+    //Wed socket truyen du lieu tu client den admin
     @MessageMapping("/BILL_REAL_TIME/{idSocket}")
     @SendTo("/topic/{idSocket}")
     public SocketMessage billRealTime(@DestinationVariable String idSocket, SocketMessage<ExportingBillDto> message) {

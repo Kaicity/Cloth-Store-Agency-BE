@@ -6,36 +6,40 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.2</version>
-        <relativePath/> <!-- lookup parent from repository -->
     </parent>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <modules>
+        <module>ct-start</module>
+        <module>ct-api</module>
+        <module>ct-common</module>
+        <module>ct-common-dal</module>
+        <module>ct-core-service</module>
+        <module>ct-core-model</module>
+    </modules>
+
     <groupId>com.example</groupId>
     <artifactId>cloth-store-agency</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>cloth-store-warehouse</name>
-    <description>cloth-store-warehouse</description>
-    <properties>
-        <java.version>17</java.version>
-    </properties>
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
+    <name>cloth-store-agency</name>
+    <description>cloth-store-agency</description>
+    <packaging>pom</packaging>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>3.2.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
