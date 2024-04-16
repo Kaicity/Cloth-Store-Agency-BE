@@ -7,7 +7,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="ct-common" />
-        <module name="cloth-store-agency" />
         <module name="ct-api" />
         <module name="ct-core-service" />
         <module name="ct-start" />
@@ -22,7 +21,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="cloth-store-agency" options="-parameters" />
+      <module name="cloth-store-agency" options="" />
       <module name="ct-api" options="-parameters" />
       <module name="ct-common" options="-parameters" />
       <module name="ct-common-dal" options="-parameters" />

@@ -14,13 +14,16 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 @Component
 public class WarehouseServiceRequest {
-    private String warehouseApiUrl = "http://localhost:5556";
+
+    @Value("${portWarehouse}")
+    private String warehouseApiUrl;
 
     public <T, K> T post(String uri, K body, Class<T> clazz, HttpServletRequest request)
             throws IOException {

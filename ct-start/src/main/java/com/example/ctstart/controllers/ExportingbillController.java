@@ -41,6 +41,7 @@ public class ExportingbillController {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getExportingById(HttpServletRequest request, @PathVariable String id) {
         try {
@@ -51,10 +52,11 @@ public class ExportingbillController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error get Payment: " + e.getMessage());
         }
     }
+
     @DeleteMapping("{id}")
     public ResponseEntity<?> deteleExporting(@PathVariable String id) {
         try {
-            exportingbillService .deleteExportingFullByid(id);
+            exportingbillService.deleteExportingFullByid(id);
             return ResponseEntity.ok(new ResponseDto(List.of("get all importing success"),
                     HttpStatus.OK.value(), "deleted : " + id));
         } catch (Exception e) {
@@ -63,7 +65,8 @@ public class ExportingbillController {
                     HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
-    @PostMapping ("/getAllExportingBill")
+
+    @PostMapping("/getAllExportingBill")
     public ResponseEntity<?> getAllExportingbill(HttpServletRequest request) {
         try {
             List<ExportingBillFullDto> result = exportingbillService.getAllExportingbill(request);
@@ -76,16 +79,16 @@ public class ExportingbillController {
         }
     }
 
-    @PostMapping ("/findExportingAll")
+    @PostMapping("/findExportingAll")
     private ResponseEntity<?> seachAllExporting(HttpServletRequest request) {
         try {
-            int a=0;
+            int a = 0;
             var result = exportingbillService.getAllExportingBillUseBaseSearch(request);
             return ResponseEntity.ok(new ResponseDto(List.of("Successful for find!"), HttpStatus.OK.value(), result));
 
         } catch (RuntimeException | IOException e) {
             logger.error(e.getMessage(), e);
-            return ResponseEntity.ok(new ResponseDto(List.of("ngu"+e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
+            return ResponseEntity.ok(new ResponseDto(List.of("get all bill unsuccess" + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
         }
     }
 
@@ -100,10 +103,11 @@ public class ExportingbillController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Payment: " + e.getMessage());
         }
     }
+
     @PostMapping("testSpr2")
     public void go() {
         messagingTemplate.convertAndSend("/topic/" + "billRealTimeSection",
-                new SocketMessage("billRealTimeSection", "gi dc r ha ghe v", new ExportingBillDto()));
+                new SocketMessage("billRealTimeSection", "Wedsocket sending ...", new ExportingBillDto()));
     }
 
     @PostMapping("test")

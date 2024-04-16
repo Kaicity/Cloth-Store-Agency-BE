@@ -50,6 +50,7 @@ public class IExportingServiceImpl implements IExportingbillService {
             if (tempEx.getCustomer() == null) {
 
                 CustomerModel customer = new CustomerModel();
+                customer.setEid(null);
                 tempEx.setCustomer(customer);
             }
             ExportbillEntity exportbillEntity = IExportingbillMapper.INSTANCE.toFromExportingbillEntity(exportingBillFullDto.getExportingBill());
