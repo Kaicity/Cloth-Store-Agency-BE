@@ -16,6 +16,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        System.out.println(clientFEPort + "||" + adminFEPort);
         registry.addMapping("/api/**") // Đặt URL pattern của API của bạn ở đây
                 .allowedOrigins(clientFEPort, adminFEPort)
                 .allowedMethods("GET", "POST", "PUT", "DELETE") // Cho phép các phương thức HTTP
