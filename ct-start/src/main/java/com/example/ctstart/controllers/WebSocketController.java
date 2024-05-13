@@ -2,6 +2,7 @@ package com.example.ctstart.controllers;
 
 import com.example.ctapi.dtos.response.ExportingBillDto;
 import com.example.ctapi.dtos.response.SocketMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WebSocketController {
+    @Autowired
     private final SimpMessagingTemplate messagingTemplate;
     public WebSocketController(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
