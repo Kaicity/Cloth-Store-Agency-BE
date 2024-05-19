@@ -31,11 +31,14 @@ Note: Application.properties different to deployment server
 ## Update and run maven project:
 Run `mvn clean install`
 
+## Run and start warehouse springboot project
+Run application
+
 ## Deloyment Docker
 ...
 ...
 ...
 
-##Image Demo
+## Image Demo
 ![agency](https://github.com/Kaicity/Kaicity/blob/main/assets/Screenshot%202024-05-20%20005525.png)
 
