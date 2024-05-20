@@ -35,10 +35,19 @@ Run `mvn clean install`
 Run application
 
 ## Deloyment Docker
-...
-...
-...
 
+This is an instructional clip: https://youtu.be/GE7tn2l9B1E 
+For agencydb :
+
+ - Build image for this : " docker build -t agencydb . "
+
+ - Create Container from image : " docker run -p 3308:3306 --name agencydb agencydb "
+
+For agencybe you open terminal in ct-start:
+
+ - Build image for this : " docker build -t agencybe . "
+
+ - Create Container from image : " docker run -p 5555:5555 --name agencybe agencybe "
 ## Image Demo
 ![agency](https://github.com/Kaicity/Kaicity/blob/main/assets/Screenshot%202024-05-20%20005525.png)
 
